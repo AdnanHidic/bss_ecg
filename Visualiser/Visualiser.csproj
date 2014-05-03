@@ -70,6 +70,10 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Models\ECG.cs" />
+    <Compile Include="Models\ECGAnnotation.cs" />
+    <Compile Include="Models\ECGPoint.cs" />
+    <Compile Include="Processing\PanTompkins.cs" />
     <Compile Include="Views\Main.xaml.cs">
       <DependentUpon>Main.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -106,7 +110,6 @@
   <ItemGroup>
     <Folder Include="Controllers\" />
     <Folder Include="IO\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

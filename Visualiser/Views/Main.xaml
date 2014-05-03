@@ -1,8 +1,40 @@
 ﻿<Window x:Class="Visualiser.Views.Main"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:oxy="http://oxyplot.codeplex.com"
         Title="ECG Visualiser" Height="350" Width="525">
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="56*"/>
+            <ColumnDefinition Width="405*"/>
+            <ColumnDefinition Width="56*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="22"/>
+            <RowDefinition Height="139*"/>
+            <RowDefinition Height="10*"/>
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0" Grid.ColumnSpan="3" Background="#FFD3E2F7">
+            <MenuItem Header="File">
+                <MenuItem Header="Open ECG signal"/>
+                <MenuItem Header="Save ECG signal"/>
+            </MenuItem>
+            <MenuItem Header="Signal">
+                <MenuItem Header="Crop signal"/>
+                <Separator/>
+                <MenuItem Header="Detect QRS"/>
+                <MenuItem Header="Clear QRS"/>
+                <Separator/>
+                <MenuItem Header="Insert annotation"/>
+                <MenuItem Header="Edit annotation"/>
+                <MenuItem Header="Delete annotation"/>
+            </MenuItem>
+            <MenuItem Header="About" Click="MenuAbout_Click"/>
+        </Menu>
+        <oxy:Plot x:Name="Plot1" Title="ECG signal" Model="{Binding PlotModel}" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="1">
+            <oxy:Plot.Axes>
+                <oxy:DateTimeAxis Position="Bottom" StringFormat="HH:mm:ss" />
+            </oxy:Plot.Axes>
+        </oxy:Plot>
     </Grid>
 </Window>

@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using Visualiser.Models;
+
 namespace Visualiser.Views
 {
     /// <summary>
@@ -22,7 +24,27 @@ namespace Visualiser.Views
     {
         public Main()
         {
+            BeforeInitializeComponent();
             InitializeComponent();
+            AfterInitializeComponent();
+        }
+
+        private void BeforeInitializeComponent()
+        {
+            currentSignal = new ECG();
+            DataContext = currentSignal;
+        }
+
+        private void AfterInitializeComponent()
+        {
+            
+        }
+
+        private ECG currentSignal;
+
+        private void MenuAbout_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Simple utility application for displaying PhysioNet-compliant ECG signals.\nAuthors: Hajdarević Adnan, Hidić Adnan, Zubanović Damir");
         }
     }
 }
