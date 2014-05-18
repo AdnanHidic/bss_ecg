@@ -31,8 +31,7 @@ namespace Visualiser.Views
 
         private void BeforeInitializeComponent()
         {
-            currentSignal = new ECG();
-            DataContext = currentSignal;
+
         }
 
         private void AfterInitializeComponent()
@@ -40,7 +39,6 @@ namespace Visualiser.Views
             
         }
 
-        private ECG currentSignal;
 
         private void MenuAbout_Click(object sender, RoutedEventArgs e)
         {

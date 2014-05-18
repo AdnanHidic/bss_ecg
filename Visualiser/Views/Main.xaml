@@ -31,7 +31,7 @@
             </MenuItem>
             <MenuItem Header="About" Click="MenuAbout_Click"/>
         </Menu>
-        <oxy:Plot x:Name="Plot1" Title="ECG signal" Model="{Binding PlotModel}" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="1">
+        <oxy:Plot x:Name="Plot1" Title="ECG signal" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="1">
             <oxy:Plot.Axes>
                 <oxy:DateTimeAxis Position="Bottom" StringFormat="HH:mm:ss" />
             </oxy:Plot.Axes>
