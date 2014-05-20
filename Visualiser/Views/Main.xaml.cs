@@ -1,4 +1,8 @@
-﻿using System;
+﻿using OxyPlot;
+using OxyPlot.Annotations;
+using OxyPlot.Axes;
+using OxyPlot.Series;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +16,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
 using Visualiser.Models;
 
 namespace Visualiser.Views
@@ -36,12 +39,11 @@ namespace Visualiser.Views
 
         private void AfterInitializeComponent()
         {
-            
         }
-
 
         private void MenuAbout_Click(object sender, RoutedEventArgs e)
         {
+
             MessageBox.Show("Simple utility application for displaying PhysioNet-compliant ECG signals.\nAuthors: Hajdarević Adnan, Hidić Adnan, Zubanović Damir");
         }
     }
