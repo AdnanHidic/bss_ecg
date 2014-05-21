@@ -39,5 +39,12 @@ namespace Visualiser.Models
         /// List of ECG points that are R-spikes for current signal. Is seperately updated from Points attribute.
         /// </summary>
         public List<ECGPoint> Spikes { get; set; }
+
+        public ECG()
+        {
+            Points = new List<ECGPoint>();
+            Annotations = new List<ECGAnnotation>();
+            Spikes = new List<ECGPoint>();
+        }
     }
 }

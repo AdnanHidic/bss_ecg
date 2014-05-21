@@ -133,7 +133,8 @@ namespace Visualiser.ViewModels
             #region annotations initialization
             {
                 // poor library design made me do this..
-                _annotationsView = new PlotElementCollection<Annotation>(_plotModel);
+                _annotationsView = _plotModel.Annotations;
+                
             }
             #endregion 
 
@@ -148,6 +149,8 @@ namespace Visualiser.ViewModels
                 _plotModel.Series.Add(_spikesView);
             }
             #endregion
+            // some default values
+            _areAnnotationsDisplayed = _areCustomSolutionAnnotationsDisplayed = true;
 
             // after the initialization, set the ECGPlot's model to the one we set up
             ECGPlot.Model = _plotModel;
@@ -155,9 +158,8 @@ namespace Visualiser.ViewModels
 
         private void _plotModel_MouseDown(object sender, OxyMouseDownEventArgs e)
         {
-            DataPoint dp = Axis.InverseTransform(e.Position, _plotModel.Axes[0], _plotModel.Axes[1]);
-            String s = "lolz";
-            
+           // we wont be needing this..
+           // DataPoint dp = Axis.InverseTransform(e.Position, _plotModel.Axes[0], _plotModel.Axes[1]);            
         }
 
         /// <summary>
@@ -199,7 +201,7 @@ namespace Visualiser.ViewModels
         }
 
         /// <summary>
-        /// Refreshes the current view. Should be performed after each change of the dataset.
+        /// Refreshes the current view. Should be performed after each change of the dataset by shallow copy property.
         /// </summary>
         public void refresh()
         {
@@ -218,12 +220,144 @@ namespace Visualiser.ViewModels
                     ecgpoint => {
                         _signalView.Points.Add(new DataPoint(ecgpoint.TimeIndex, ecgpoint.Value));
                     });
+
+                // do the same for R-spikes (scatter points)
+                loadRSpikesFromSignalView();
+
+                // and do the same for annotations
+                loadAnnotationsFromSignalView();
             }
 
             // in the end, force the view to refresh
             ECGPlot.InvalidatePlot(true);
-        }       
+        }
 
+        private void loadRSpikesFromSignalView()
+        {
+            _ecgSignal.Spikes.ForEach(
+                spike =>
+                {
+                    _spikesView.Points.Add(new ScatterPoint(spike.TimeIndex, spike.Value));
+                });
+        }
+
+        private void loadAnnotationsFromSignalView(Boolean filterOutSolutions = false)
+        {
+            if (_ecgSignal == null)
+                return;
+
+            _ecgSignal.Annotations.ForEach(
+                ecgannotation =>
+                {
+                    if (filterOutSolutions && ecgannotation.Type == ECGAnnotation.TYPE.SOLUTION)
+                        return;
+
+                    DataPoint positionForAnnotation;
+                    switch (ecgannotation.Type){
+                        case ECGAnnotation.TYPE.PHYSIONET_STANDARD:
+                            positionForAnnotation = new DataPoint(ecgannotation.TimeIndex, -4.5);
+                            break;
+                        case ECGAnnotation.TYPE.SOLUTION:
+                            positionForAnnotation = new DataPoint(ecgannotation.TimeIndex, -3.5);
+                            break;
+                        default:
+                            positionForAnnotation = new DataPoint(ecgannotation.TimeIndex, 4.2);
+                            break;
+                    }
+
+                    TextAnnotation textAnnotation = new TextAnnotation()
+                    {
+                        Text = ecgannotation.Text,
+                        TextPosition = positionForAnnotation,
+                        Background = OxyColors.White
+                    };
+
+                    _annotationsView.Add(textAnnotation);
+                });
+        }
+
+
+        /// <summary>
+        /// Gets or sets status of display of R-spikes.
+        /// </summary>
+        public Boolean IsQRSDisplayed
+        {
+            get
+            {
+                return _spikesView.IsVisible;
+            }
+            set
+            {
+                // set the new value
+                _spikesView.IsVisible = value;
+                // then apply it
+                ECGPlot.InvalidatePlot(true);
+            }
+        }
+
+        private Boolean _areAnnotationsDisplayed;
+
+        /// <summary>
+        /// Gets or sets status of display of all annotations. Supersedes all other annotation toggles.
+        /// Automatically refreshes the view.
+        /// </summary>
+        public Boolean AreAnnotationsDisplayed
+        {
+            get
+            {
+                return _areAnnotationsDisplayed; 
+            }
+            set
+            {
+                _areAnnotationsDisplayed = value;
+                // clear old annotations 
+                _annotationsView.Clear();
+
+                // if annotations should be displayed, then reload them
+                if (_areAnnotationsDisplayed)
+                {
+                    // turn off other annotations
+                    _areCustomSolutionAnnotationsDisplayed = false;
+                    // reload 
+                    loadAnnotationsFromSignalView();
+                }
+
+                // do refresh
+                ECGPlot.InvalidatePlot(true);
+            }
+        }
+
+        private Boolean _areCustomSolutionAnnotationsDisplayed;
+        
+        /// <summary>
+        /// Gets or sets status of display of custom solution annotations. Cannot be set to true if AreAnnotationsDisplay=false
+        /// Automatically refreshes the view.
+        /// </summary>
+        public Boolean AreCustomSolutionAnnotationsDisplayed
+        {
+            get
+            {
+                return _areCustomSolutionAnnotationsDisplayed;
+            }
+            set
+            {
+                // if annotations are turned off, dont do anything (also if the new value is the same as the old one)
+                if (!_areAnnotationsDisplayed || _areCustomSolutionAnnotationsDisplayed == value)
+                    return;
+                else
+                {
+                    _areCustomSolutionAnnotationsDisplayed = value;
+
+                    // clear all old annotations 
+                    _annotationsView.Clear();
+
+                    loadAnnotationsFromSignalView(!_areCustomSolutionAnnotationsDisplayed);
+
+                    // do refresh
+                    ECGPlot.InvalidatePlot(true);                      
+                }
+            }
+        }
 
     }
 }

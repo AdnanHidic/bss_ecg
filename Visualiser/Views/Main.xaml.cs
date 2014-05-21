@@ -36,15 +36,69 @@ namespace Visualiser.Views
         {
 
         }
+        private ECG signal;
 
         private void AfterInitializeComponent()
         {
+            signal = new ECG();
+            signal.SamplingRate = 360;
+            signal.HeartRate = 70;
+            signal.Name = "100";
+            signal.Points.AddRange(
+                new List<ECGPoint>()
+                {
+                    new ECGPoint(){
+                        TimeIndex = 0.04,
+                        Value = 0.5
+                    },
+                    new ECGPoint(){
+                        TimeIndex = 0.12,
+                        Value = 0.8
+                    },
+                    new ECGPoint(){
+                        TimeIndex = 0.2,
+                        Value = 0.6
+                    },
+                    new ECGPoint(){
+                        TimeIndex = 0.28,
+                        Value = 1.5
+                    },
+                    new ECGPoint(){
+                        TimeIndex = 0.36,
+                        Value = 2.5
+                    },
+                }
+            );
+            ecgView.ECGSignal = signal;
         }
 
         private void MenuAbout_Click(object sender, RoutedEventArgs e)
         {
 
             MessageBox.Show("Simple utility application for displaying PhysioNet-compliant ECG signals.\nAuthors: Hajdarević Adnan, Hidić Adnan, Zubanović Damir");
+        }
+
+        private void InsertAnnotation_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            signal.Annotations.AddRange(new List<ECGAnnotation>(){
+                new ECGAnnotation(){
+                    Text = "ANSWER",
+                    TimeIndex = 0.2,
+                    Type = ECGAnnotation.TYPE.ANSWER
+                },
+                new ECGAnnotation(){
+                    Text = "SOLUTION",
+                    TimeIndex = 0.2,
+                    Type = ECGAnnotation.TYPE.SOLUTION
+                },
+                new ECGAnnotation(){
+                    Text = "STANDARD",
+                    TimeIndex = 0.36,
+                    Type = ECGAnnotation.TYPE.PHYSIONET_STANDARD
+                }
+            });
+
+            ecgView.refresh();
         }
     }
 }

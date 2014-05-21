@@ -21,14 +21,14 @@
                 <MenuItem Header="Save ECG signal"/>
             </MenuItem>
             <MenuItem Header="Signal">
-                <MenuItem Header="Crop signal"/>
-                <Separator/>
                 <MenuItem Header="Detect QRS"/>
-                <MenuItem Header="Clear QRS"/>
+                <MenuItem Header="Toggle QRS"/>
                 <Separator/>
-                <MenuItem Header="Insert annotation"/>
+                <MenuItem Header="Insert annotation" Click="InsertAnnotation_MenuItem_Click"/>
                 <MenuItem Header="Edit annotation"/>
                 <MenuItem Header="Delete annotation"/>
+                <Separator/>
+                <MenuItem Header="Toggle solution annotations"/>
             </MenuItem>
             <MenuItem Header="About" Click="MenuAbout_Click"/>
         </Menu>
