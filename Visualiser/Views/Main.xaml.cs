@@ -18,6 +18,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Visualiser.IO;
+using Visualiser.IO.Exceptions;
 using Visualiser.Models;
 using Visualiser.Processing;
 
@@ -32,8 +34,8 @@ namespace Visualiser.Views
         {
             BeforeInitializeComponent();
             InitializeComponent();
-            //AfterInitializeComponent();
-            StaticAfterInitializeComponent();
+            AfterInitializeComponent();
+            //StaticAfterInitializeComponent();
         }
 
         private void BeforeInitializeComponent()
@@ -74,6 +76,9 @@ namespace Visualiser.Views
 
         private void InsertAnnotation_MenuItem_Click(object sender, RoutedEventArgs e)
         {
+            if (signal == null)
+                return;
+
             AnnotationInsert annotationInsertWindow = new AnnotationInsert();
             annotationInsertWindow.annotationInsertRequested += annotationInsertWindow_annotationInsertRequested;
             annotationInsertWindow.Show();            
@@ -87,7 +92,18 @@ namespace Visualiser.Views
 
         private void DeleteAnnotation_MenuItem_Click(object sender, RoutedEventArgs e)
         {
+            if (signal == null)
+                return;
 
+            AnnotationDelete annotationDeleteWindow = new AnnotationDelete(signal.Annotations);
+            annotationDeleteWindow.annotationDeletionRequested += annotationDeleteWindow_annotationDeletionRequested;
+            annotationDeleteWindow.Show();
+        }
+
+        void annotationDeleteWindow_annotationDeletionRequested(ECGAnnotation annotation)
+        {
+            signal.Annotations.Remove(annotation);
+            ecgView.refresh();
         }
 
         private void ToggleAllAnnotations_MenuItem_Click(object sender, RoutedEventArgs e)
@@ -102,6 +118,9 @@ namespace Visualiser.Views
 
         private void DetectQRS_MenuItem_Click(object sender, RoutedEventArgs e)
         {
+            if (signal == null)
+                return;
+
             var result = QRSDetector.QRS_Detect(signal);
             signal.HeartRate = result.Item2;
             signal.Spikes = result.Item1;
@@ -116,13 +135,72 @@ namespace Visualiser.Views
 
         private void Open_MenuItem_Click(object sender, RoutedEventArgs e)
         {
+            // Create OpenFileDialog 
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog()
+            {
+                DefaultExt = ".HEA",
+                Filter="HEA Files (*.HEA)|*.HEA"
+            };
 
+            // Display OpenFileDialog by calling ShowDialog method 
+            Nullable<bool> result = dlg.ShowDialog();
+
+
+            // Get the selected file name
+            if (result == true)
+            {
+                // Open file name
+                string filename = dlg.FileName;
+                try
+                {
+                    signal = IOManager.loadECGFromSignalFile(filename);
+                }
+                catch (RequiredFilesMissingException ex)
+                {
+                    String msg = "Signal files missing: ";
+                    foreach (RequiredFilesMissingException.RequiredFiles rf in ex.MissingFiles)
+                        msg += rf + " ";
+                    MessageBox.Show(msg);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+            // else just ignore it
         }
 
 
         private void Save_MenuItem_Click(object sender, RoutedEventArgs e)
         {
+            if (signal == null)
+                MessageBox.Show("Nothing to save..");
+            else
+            {
+                Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+                dlg.FileName = signal.Name; // Default file name
+                dlg.DefaultExt = ".HEA"; // Default file extension
+                dlg.Filter = "HEA Files (.HEA)|*.HEA"; // Filter files by extension
 
+                // Show save file dialog box
+                Nullable<bool> result = dlg.ShowDialog();
+
+                // Process save file dialog box results
+                if (result == true)
+                {
+                    // Save document
+                    string filename = dlg.FileName;
+                    try
+                    {
+                        IOManager.saveECGToSignalFiles(signal, filename);
+                        MessageBox.Show("Saved successfully");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                }
+            }
         }
 
 

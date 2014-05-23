@@ -13,7 +13,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="22"/>
             <RowDefinition/>
-            <RowDefinition Height="90"/>
         </Grid.RowDefinitions>
         <Menu Grid.Row="0" Grid.ColumnSpan="3" Background="#FFD3E2F7">
             <MenuItem Header="File">

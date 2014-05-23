@@ -19,10 +19,11 @@ namespace Visualiser.IO
         /// Used to generate ECG signal model from PhysioNet signal files. Method searches for .HEA, .DAT and .ATR files 
         /// with the name given as method call parameter.
         /// </summary>
-        /// <param name="signalFileName">Name of the signal (e.g. 100)</param>
+        /// <param name="signalFileName">Full path to the HEA file (e.g. C:\100.HEA)</param>
         /// <returns>Generated ECG model.</returns>
         static public ECG loadECGFromSignalFile(String signalFileName)
         {
+            // look for HEA ATR DAT & CUST on path etc.
             throw new NotImplementedException();
         }
 
@@ -30,9 +31,10 @@ namespace Visualiser.IO
         /// Used to save ECG signal model to PhysioNet signal files. Method generates .HEA, .DAT and .ATR files 
         /// with the name given as method call parameter.
         /// </summary>
-        /// <param name="signalFileName">Name of the signal (e.g. 100)</param>
-        static public void saveECGToSignalFiles(String signalFileName)
+        /// <param name="signalFileName">Path + signal name (e.g. C:\100)</param>
+        static public void saveECGToSignalFiles(ECG signal, String signalFileName)
         {
+            // save HEA ATR DAT & CUST
             throw new NotImplementedException();
         }
     }

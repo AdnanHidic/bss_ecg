@@ -23,6 +23,11 @@ namespace Visualiser.Models
         /// Gets or sets timeindex which annotation belongs to. It is given in seconds. e.g. if sampling rate is 360Hz, then the 1st point has TI of 0, 2nd of 0.002, 3rd of 0.004 etc.
         /// </summary>
         public double TimeIndex { get; set; }
+
+        public override String ToString()
+        {
+            return "Type " + Type + " at " + TimeIndex+ " [seconds]";
+        }
     }
 
     /// <summary>
