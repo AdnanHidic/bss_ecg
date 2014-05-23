@@ -40,9 +40,9 @@ namespace Visualiser.Processing
         
         }
 
-        const double THRESHOLD_PARAM = 8;
-        const double FILTER_PARAMETER = 16;
-        const int SAMPLE_RATE = 250;
+        private const double THRESHOLD_PARAM = 8;
+        private const double FILTER_PARAMETER = 16;
+        private const int SAMPLE_RATE = 250;
 
 
         // originalni rad: http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=754529&url=http%3A%2F%2Fieeexplore.ieee.org%2Fxpls%2Fabs_all.jsp%3Farnumber%3D754529
@@ -120,7 +120,6 @@ namespace Visualiser.Processing
                     }
                 }
             }
-
             return rIndices;
         }
     }

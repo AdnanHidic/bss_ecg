@@ -12,13 +12,9 @@ namespace Visualiser.Models
     public class ECGAnnotation
     {
         /// <summary>
-        /// Annotations can be default physionet ones, or custom ones for exams, e.g. solution and answer.
-        /// </summary>
-        public enum TYPE {PHYSIONET_STANDARD, SOLUTION, ANSWER }
-        /// <summary>
         /// Gets or sets annotation type.
         /// </summary>
-        public TYPE Type { get; set; }
+        public ANNOTATION_TYPE Type { get; set; }
         /// <summary>
         /// Gets or sets annotation text.
         /// </summary>
@@ -28,4 +24,9 @@ namespace Visualiser.Models
         /// </summary>
         public double TimeIndex { get; set; }
     }
+
+    /// <summary>
+    /// Annotations can be default physionet ones, or custom ones for exams, e.g. solution and answer.
+    /// </summary>
+    public enum ANNOTATION_TYPE { PHYSIONET_STANDARD, SOLUTION, ANSWER }
 }

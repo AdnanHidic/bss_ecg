@@ -69,6 +69,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\AnnotationDelete.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\AnnotationInsert.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Main.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -85,6 +93,12 @@
     <Compile Include="Processing\PanTompkins.cs" />
     <Compile Include="ViewModels\ECGView.xaml.cs">
       <DependentUpon>ECGView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AnnotationDelete.xaml.cs">
+      <DependentUpon>AnnotationDelete.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AnnotationInsert.xaml.cs">
+      <DependentUpon>AnnotationInsert.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Main.xaml.cs">
       <DependentUpon>Main.xaml</DependentUpon>

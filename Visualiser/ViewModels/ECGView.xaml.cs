@@ -249,15 +249,15 @@ namespace Visualiser.ViewModels
             _ecgSignal.Annotations.ForEach(
                 ecgannotation =>
                 {
-                    if (filterOutSolutions && ecgannotation.Type == ECGAnnotation.TYPE.SOLUTION)
+                    if (filterOutSolutions && ecgannotation.Type == ANNOTATION_TYPE.SOLUTION)
                         return;
 
                     DataPoint positionForAnnotation;
                     switch (ecgannotation.Type){
-                        case ECGAnnotation.TYPE.PHYSIONET_STANDARD:
+                        case  ANNOTATION_TYPE.PHYSIONET_STANDARD:
                             positionForAnnotation = new DataPoint(ecgannotation.TimeIndex, -1.8);
                             break;
-                        case ECGAnnotation.TYPE.SOLUTION:
+                        case  ANNOTATION_TYPE.SOLUTION:
                             positionForAnnotation = new DataPoint(ecgannotation.TimeIndex, -1.3);
                             break;
                         default:

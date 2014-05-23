@@ -33,7 +33,7 @@ namespace Visualiser.Views
             BeforeInitializeComponent();
             InitializeComponent();
             //AfterInitializeComponent();
-            //StaticAfterInitializeComponent();
+            StaticAfterInitializeComponent();
         }
 
         private void BeforeInitializeComponent()
@@ -77,33 +77,20 @@ namespace Visualiser.Views
 
         private void InsertAnnotation_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            signal.Annotations.AddRange(new List<ECGAnnotation>(){
-                new ECGAnnotation(){
-                    Text = "ANSWER",
-                    TimeIndex = 0.2,
-                    Type = ECGAnnotation.TYPE.ANSWER
-                },
-                new ECGAnnotation(){
-                    Text = "SOLUTION",
-                    TimeIndex = 0.2,
-                    Type = ECGAnnotation.TYPE.SOLUTION
-                },
-                new ECGAnnotation(){
-                    Text = "STANDARD",
-                    TimeIndex = 0.36,
-                    Type = ECGAnnotation.TYPE.PHYSIONET_STANDARD
-                }
-            });
+            AnnotationInsert annotationInsertWindow = new AnnotationInsert();
+            annotationInsertWindow.annotationInsertRequested += annotationInsertWindow_annotationInsertRequested;
+            annotationInsertWindow.Show();
 
+            
+        }
+
+        void annotationInsertWindow_annotationInsertRequested(ECGAnnotation annotation)
+        {
+            signal.Annotations.Add(annotation);
             ecgView.refresh();
         }
 
-        private void EditAnnotations_MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void DeleteAnnotations_MenuItem_Click(object sender, RoutedEventArgs e)
+        private void DeleteAnnotation_MenuItem_Click(object sender, RoutedEventArgs e)
         {
 
         }
@@ -124,6 +111,24 @@ namespace Visualiser.Views
         }
 
         private void ToggleSpikes_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+
+        private void Open_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+
+        private void Save_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+
+        private void Exit_MenuItem_Click(object sender, RoutedEventArgs e)
         {
 
         }
