@@ -99,10 +99,10 @@ namespace Visualiser.ViewModels
                     TitleFontWeight = OxyPlot.FontWeights.Bold,
                     IsZoomEnabled = false,
                     Position = AxisPosition.Left,
-                    Minimum = -5,
-                    Maximum = 5,
-                    AbsoluteMinimum = -5,
-                    AbsoluteMaximum = 5,
+                    Minimum = -2,
+                    Maximum = 2,
+                    AbsoluteMinimum = -2,
+                    AbsoluteMaximum = 2,
                     MajorStep = 0.5,
                     MinorStep = 0.1,
                     MajorGridlineStyle = LineStyle.Solid,
@@ -255,13 +255,13 @@ namespace Visualiser.ViewModels
                     DataPoint positionForAnnotation;
                     switch (ecgannotation.Type){
                         case ECGAnnotation.TYPE.PHYSIONET_STANDARD:
-                            positionForAnnotation = new DataPoint(ecgannotation.TimeIndex, -4.5);
+                            positionForAnnotation = new DataPoint(ecgannotation.TimeIndex, -1.8);
                             break;
                         case ECGAnnotation.TYPE.SOLUTION:
-                            positionForAnnotation = new DataPoint(ecgannotation.TimeIndex, -3.5);
+                            positionForAnnotation = new DataPoint(ecgannotation.TimeIndex, -1.3);
                             break;
                         default:
-                            positionForAnnotation = new DataPoint(ecgannotation.TimeIndex, 4.2);
+                            positionForAnnotation = new DataPoint(ecgannotation.TimeIndex, 1.5);
                             break;
                     }
 
