@@ -317,9 +317,9 @@ namespace Visualiser.ViewModels
                 if (_areAnnotationsDisplayed)
                 {
                     // turn off other annotations
-                    _areCustomSolutionAnnotationsDisplayed = false;
+                    _areCustomSolutionAnnotationsDisplayed = true;
                     // reload 
-                    loadAnnotationsFromSignalView();
+                    loadAnnotationsFromSignalView(false);
                 }
 
                 // do refresh

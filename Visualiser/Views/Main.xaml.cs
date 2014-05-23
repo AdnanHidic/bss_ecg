@@ -58,9 +58,6 @@ namespace Visualiser.Views
             {
                 signal.Points.Add(new ECGPoint(){TimeIndex= (double)(i+1)/360, Value = points[i]});
             }
-            var result = QRSDetector.QRS_Detect(signal);
-            signal.HeartRate = result.Item2;
-            signal.Spikes = result.Item1;
             ecgView.ECGSignal = signal;
         }
 
@@ -79,9 +76,7 @@ namespace Visualiser.Views
         {
             AnnotationInsert annotationInsertWindow = new AnnotationInsert();
             annotationInsertWindow.annotationInsertRequested += annotationInsertWindow_annotationInsertRequested;
-            annotationInsertWindow.Show();
-
-            
+            annotationInsertWindow.Show();            
         }
 
         void annotationInsertWindow_annotationInsertRequested(ECGAnnotation annotation)
@@ -97,22 +92,25 @@ namespace Visualiser.Views
 
         private void ToggleAllAnnotations_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            ecgView.AreAnnotationsDisplayed = !ecgView.AreAnnotationsDisplayed;
         }
 
         private void ToggleSolutionAnnotations_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            ecgView.AreCustomSolutionAnnotationsDisplayed = !ecgView.AreCustomSolutionAnnotationsDisplayed;
         }
 
         private void DetectQRS_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            var result = QRSDetector.QRS_Detect(signal);
+            signal.HeartRate = result.Item2;
+            signal.Spikes = result.Item1;
+            ecgView.refresh();
         }
 
         private void ToggleSpikes_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            ecgView.IsQRSDisplayed = !ecgView.IsQRSDisplayed;
         }
 
 
@@ -130,7 +128,7 @@ namespace Visualiser.Views
 
         private void Exit_MenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            this.Close();
         }
     }
 }

@@ -71,7 +71,7 @@ namespace Visualiser.Views
                         Type = selectedType,
                         TimeIndex = timeIndex
                     };
-
+                    MessageBox.Show("Insertion successful!");
                     OnAnnotationInsertRequested(annot);
                 }
                 catch (Exception)
