@@ -41,7 +41,7 @@ namespace Visualiser.IO
         /// </summary>
         /// <param name="signalFileName">Full path to the HEA file (e.g. C:\100.HEA)</param>
         /// <returns>Generated ECG model.</returns>
-        static public ECG loadECGFromSignalFile(String signalFileName, int channelToLoad)
+        static public ECG loadECGFromSignalFile(String signalFileName, int channelToLoad=0)
         {
 
             // look for HEA ATR DAT & CUST on path etc.
