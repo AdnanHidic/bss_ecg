@@ -41,11 +41,81 @@ namespace Visualiser.IO
         /// </summary>
         /// <param name="signalFileName">Full path to the HEA file (e.g. C:\100.HEA)</param>
         /// <returns>Generated ECG model.</returns>
-        static public ECG loadECGFromSignalFile(String signalFileName, int channelToLoad=0)
+        static public ECG loadECGFromSignalFile(String signalFileName, int channelToLoad=1)
         {
+            String signal = signalFileName.Substring(0,signalFileName.Length - 4);
+            //Frequency  = 360;
+            FileStream file = new FileStream(signal+".dat", FileMode.Open);
+            BinaryReader binReader = new BinaryReader(file);
+            List<ECGPoint> ecgPoints = new List<ECGPoint>();
+            int count = 0;
+            short flag = 0;
+            long low = 0, high = 0;
+            byte[] buf = { 0, 0, 0 };
 
+            for (int i = 0; i < file.Length / 3; i++)
+            {
+                for (short j = 1; j <= 2; j++)
+                {
+                    count++;
+                    switch (flag)
+                    {
+                        case 0:
+                            try
+                            {
+                                buf = binReader.ReadBytes(3);
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e.ToString());  
+                            }
+                            low = buf[1] & 0x0F;
+                            high = buf[1] & 0xF0;
+                            if (channelToLoad == j)
+                                if (low > 7)
+                                {
+                                    ECGPoint ecgPoint = new ECGPoint();
+                                    ecgPoint.TimeIndex = count / Convert.ToDouble(Frequency);
+                                    ecgPoint.Value = Convert.ToDouble(buf[0] + (low << 8) - 4096);
+                                    ecgPoints.Add(ecgPoint);
+                                }
+                                else
+                                {
+                                    ECGPoint ecgPoint = new ECGPoint();
+                                    ecgPoint.TimeIndex = count / Convert.ToDouble(Frequency);
+                                    ecgPoint.Value = Convert.ToDouble((buf[0] + (low << 8) - 1024) * 0.005);
+                                    ecgPoints.Add(ecgPoint);
+                                }
+                            flag = 1;
+                            break;
+                        case 1:
+                            if (channelToLoad == j)
+                                if (high > 127)
+                                {
+                                    ECGPoint ecgPoint = new ECGPoint();
+                                    ecgPoint.TimeIndex = count / Convert.ToDouble(Frequency);
+                                    ecgPoint.Value = Convert.ToDouble(buf[2] + (high << 4) - 4096);
+                                    ecgPoints.Add(ecgPoint);
+                                }
+                                else
+                                {
+                                    ECGPoint ecgPoint = new ECGPoint();
+                                    ecgPoint.TimeIndex = count / Convert.ToDouble(Frequency);
+                                    ecgPoint.Value = Convert.ToDouble((buf[2] + (high << 4) - 1024) * 0.005);
+                                    ecgPoints.Add(ecgPoint);
+                                }
+                            flag = 0;
+                            break;
+                    }
+                }
+            }
+            file.Close();
+            binReader.Close();
+            ECG ecg = new ECG();
+            ecg.Name = signalFileName;
+            ecg.Points = ecgPoints;
+            return ecg;
             // look for HEA ATR DAT & CUST on path etc.
-            throw new NotImplementedException();
         }
 
         /// <summary>
