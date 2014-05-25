@@ -196,7 +196,7 @@ namespace Visualiser.IO
                 increaseSampleTime = true;
 
                 int A = bytes[i + 1] >> 2;
-                int I = (((bytes[i + 1] & 0x03) << 6) | bytes[i]);
+                int I = (((bytes[i + 1] & 0x3) << 8) | bytes[i]);
 
                 switch (A)
                 {
@@ -238,7 +238,10 @@ namespace Visualiser.IO
                         {
                             // next I bytes are the aux string letters.
                             // since we are reading two bytes at a time in main for loop, the aux string starts at (i+1)+1 position hence the: i+2+offset formula
-                            aux += Convert.ToChar(bytes[i + 2 + j]);
+                            char c = Convert.ToChar(bytes[i + 2 + j]);
+                            if (c == '\0')
+                                continue;
+                            aux += c;
                         }
 
                         // if I is odd, there is a null byte pad appended to make the byte count even, but the null byte is not included in the byte count represented by I
@@ -264,6 +267,7 @@ namespace Visualiser.IO
                     annotation.Type = ANNOTATION_TYPE.PHYSIONET_STANDARD;
                     annotation.TimeIndex = sampleTime * (1.0 / Frequency);
                     annotation.Text = ECGAnnotation.getStandardAnnotationTextFromCode(A);
+                    annotation.Code = A;
                     annotation.Aux = aux;
                     annotation.Chan = chan;
                     annotation.Num = num;
@@ -290,43 +294,50 @@ namespace Visualiser.IO
             
             FileStream fs = new FileStream(atrFileName+".atr", FileMode.Create);
             BinaryWriter writer = new BinaryWriter(fs);
-            byte buf = 0x0;
+            byte buf = Convert.ToByte(0x0);
+            byte nul = Convert.ToByte(0x0);
+            int previousSampleTime = 0;
 
             for (int i = 0; i < ecg.Annotations.Count; i++)
             {
                 ECGAnnotation annotation = ecg.Annotations.ElementAt(i);
                 if (annotation.Type == ANNOTATION_TYPE.PHYSIONET_STANDARD)
                 {
-                    sampleTime = Convert.ToInt32(annotation.TimeIndex * Frequency) - sampleTime;
-                    buf = Convert.ToByte(annotation.Code | Convert.ToByte((sampleTime << 6)));
+                    sampleTime = Convert.ToInt32(annotation.TimeIndex * Frequency) - previousSampleTime;
+                    previousSampleTime = Convert.ToInt32(annotation.TimeIndex * Frequency);
+
+                    buf = Convert.ToByte(sampleTime & 0xFF);
                     writer.Write(buf);
-                    buf = Convert.ToByte(sampleTime >> 2);
+                    buf = Convert.ToByte(Convert.ToByte((annotation.Code << 2) & 0xFF) | (Convert.ToByte((sampleTime) >> 8) & 0x3));
                     writer.Write(buf);
+
                     if (annotation.Aux.Length > 0)
                     {
-                        buf = Convert.ToByte(annotation.Aux.Length);
+                        buf = Convert.ToByte((annotation.Aux.Length+1) & 0xFF);
                         writer.Write(buf);
-                        buf = Convert.ToByte(Convert.ToByte(63 << 2) | (annotation.Aux.Length & 0xC0));
+                        buf = Convert.ToByte(Convert.ToByte((63 << 2) & 0xFF) | (Convert.ToByte((annotation.Aux.Length + 1) >> 8) & 0x3));
                         writer.Write(buf);
 
                         // write down AUX
                         for (int j = 0; j < annotation.Aux.Length; j++)
                         {
-                            writer.Write(Convert.ToByte(annotation.Aux[j]));
+                            writer.Write(Convert.ToByte(annotation.Aux[j] & 0xFF));
                         }
 
-                        if (annotation.Aux.Length % 2 != 0)
+                        writer.Write(nul); // string termination...
+
+                        if (annotation.Aux.Length+1 % 2 != 0)
                         {
-                            writer.Write(0x0);
+                            writer.Write(nul);
                         }
                     }
 
                     if (annotation.SubTyp != 0)
                     {
                         // write down SUB
-                        buf = Convert.ToByte(annotation.SubTyp);
+                        buf = Convert.ToByte(annotation.SubTyp & 0xFF);
                         writer.Write(buf);
-                        buf = Convert.ToByte(Convert.ToByte(61 << 2) | (annotation.SubTyp & 0xC0));
+                        buf = Convert.ToByte(Convert.ToByte((61 << 2) & 0xFF) | (Convert.ToByte(annotation.SubTyp >> 8) & 0x3));
                         writer.Write(buf);
                     }
 
@@ -335,9 +346,9 @@ namespace Visualiser.IO
                         chan = annotation.Chan;
                         // write down new CHAN
 
-                        buf = Convert.ToByte(annotation.Chan);
+                        buf = Convert.ToByte(annotation.Chan & 0xFF);
                         writer.Write(buf);
-                        buf = Convert.ToByte(Convert.ToByte(62 << 2) | (annotation.Chan & 0xC0));
+                        buf = Convert.ToByte(Convert.ToByte((62 << 2) & 0xFF) | (Convert.ToByte(annotation.Chan >> 8) & 0x3));
                         writer.Write(buf);
                     }
 
@@ -346,18 +357,18 @@ namespace Visualiser.IO
                         num = annotation.Num;
                         // write down new NUM
 
-                        buf = Convert.ToByte(annotation.Num);
+                        buf = Convert.ToByte(annotation.Num & 0xFF);
                         writer.Write(buf);
-                        buf = Convert.ToByte(Convert.ToByte(60 << 2) | (annotation.Num & 0xC0));
+                        buf = Convert.ToByte(Convert.ToByte((60 << 2) & 0xFF) | (Convert.ToByte(annotation.Num >> 8) & 0x3));
                         writer.Write(buf);
                     }
                 }
             }
 
             // write EOF
-            buf = 0x0;
-            writer.Write(buf);
-            writer.Write(buf);
+            writer.Write(nul);
+            writer.Write(nul);
+            writer.Close();
         }
 
         static private ECG loadECGFromSignalTextFile(String signalFileName, int channelToLoad = 1)
@@ -428,7 +439,6 @@ namespace Visualiser.IO
                     streamWriter.WriteLine("{0} {1} {2} {3}", annotation.Type,signal.Channel, annotation.TimeIndex, annotation.Text);
                 }
             }
-            fileStream.Close();
             streamWriter.Close();
         }
 
