@@ -41,10 +41,18 @@ namespace Visualiser.IO
         /// </summary>
         /// <param name="signalFileName">Full path to the HEA file (e.g. C:\100.HEA)</param>
         /// <returns>Generated ECG model.</returns>
-        static public ECG loadECGFromSignalFile(String signalFileName, int channelToLoad=1)
+        static public ECG loadECGFromSignalFile(String signalFileName, int channelToLoad = 1) 
+        {
+            String type = signalFileName.Substring(signalFileName.Length - 4);
+            if (type == ".dat")
+                return loadECGFromSignalBinaryFile(signalFileName, channelToLoad);
+            else
+                return loadECGFromSignalTextFile(signalFileName, channelToLoad);
+        }
+
+        static private ECG loadECGFromSignalBinaryFile(String signalFileName, int channelToLoad=1)
         {
             String signal = signalFileName.Substring(0,signalFileName.Length - 4);
-            //Frequency  = 360;
             FileStream file = new FileStream(signal+".dat", FileMode.Open);
             BinaryReader binReader = new BinaryReader(file);
             List<ECGPoint> ecgPoints = new List<ECGPoint>();
@@ -119,10 +127,9 @@ namespace Visualiser.IO
             // look for HEA ATR DAT & CUST on path etc.
         }
 
-        static public ECG loadECGFromSignalTextFile(String signalFileName, int channelToLoad = 1)
+        static private ECG loadECGFromSignalTextFile(String signalFileName, int channelToLoad = 1)
         {
             String signal = signalFileName.Substring(0, signalFileName.Length - 4);
-            //Frequency  = 360;
             FileStream file = new FileStream(signal + ".txt", FileMode.Open);
             StreamReader streamReader = new StreamReader(file);
             List<ECGPoint> ecgPoints = new List<ECGPoint>();
