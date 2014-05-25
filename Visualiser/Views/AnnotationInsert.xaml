@@ -2,24 +2,25 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Models="clr-namespace:Visualiser.Models" x:Class="Visualiser.Views.AnnotationInsert"
-        Title="Insert new annotation" Height="280" Width="364">
+        Title="Insert new annotation" Height="236" Width="364">
     <Grid Margin="0,0,2,0">
-        <GroupBox Header="Annotation information" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="190" Width="334">
+        <GroupBox Header="Annotation information" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="155" Width="334">
             <Grid>
                 <Label Content="Annotation type:" HorizontalAlignment="Left" Margin="-2,10,0,0" VerticalAlignment="Top"/>
-                <ComboBox x:Name="cb_annotationType" HorizontalAlignment="Left" Margin="107,14,0,0" VerticalAlignment="Top" Width="205" SelectedIndex="0">
+                <ComboBox x:Name="cb_annotationType" HorizontalAlignment="Left" Margin="107,14,0,0" VerticalAlignment="Top" Width="205" SelectedIndex="0" SelectionChanged="cb_annotationType_SelectionChanged">
                     <Models:ANNOTATION_TYPE>PHYSIONET_STANDARD</Models:ANNOTATION_TYPE>
                     <Models:ANNOTATION_TYPE>SOLUTION</Models:ANNOTATION_TYPE>
                     <Models:ANNOTATION_TYPE>ANSWER</Models:ANNOTATION_TYPE>
                 </ComboBox>
-                <Label Content="Content:" HorizontalAlignment="Left" Margin="41,49,0,0" VerticalAlignment="Top"/>
-                <TextBox x:Name="tb_content" HorizontalAlignment="Left" Height="62" Margin="107,52,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="205"/>
-                <Label Content="Timestamp" HorizontalAlignment="Left" Margin="28,123,0,0" VerticalAlignment="Top"/>
-                <TextBox x:Name="tb_timestamp" HorizontalAlignment="Left" Height="23" Margin="107,125,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="205"/>
+                <Label x:Name="l_content" Content="Content:" HorizontalAlignment="Left" Margin="41,49,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="tb_content" HorizontalAlignment="Left" Height="37" Margin="107,52,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="205"/>
+                <Label Content="Timestamp" HorizontalAlignment="Left" Margin="28,94,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="tb_timestamp" HorizontalAlignment="Left" Height="23" Margin="107,97,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="205"/>
+                <ComboBox x:Name="cb_standard_content" HorizontalAlignment="Left" Margin="107,53,0,0" VerticalAlignment="Top" Width="205"/>
             </Grid>       
         </GroupBox>
-        <Button Content="Insert" HorizontalAlignment="Left" Margin="189,205,0,0" VerticalAlignment="Top" Width="75" Click="Insert_Button_Click"/>
-        <Button Content="Cancel" HorizontalAlignment="Left" Margin="269,205,0,0" VerticalAlignment="Top" Width="75" Click="Close_Button_Click"/>
+        <Button Content="Insert" HorizontalAlignment="Left" Margin="185,170,0,0" VerticalAlignment="Top" Width="75" Click="Insert_Button_Click"/>
+        <Button Content="Cancel" HorizontalAlignment="Left" Margin="265,170,0,0" VerticalAlignment="Top" Width="75" Click="Close_Button_Click"/>
         
 
     </Grid>
