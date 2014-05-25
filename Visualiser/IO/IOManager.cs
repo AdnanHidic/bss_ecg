@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-
+using Visualiser.IO.Exceptions;
 using Visualiser.Models;
 
 namespace Visualiser.IO
@@ -21,6 +21,14 @@ namespace Visualiser.IO
         static private int ChannelNumber;
 
         static public List<String> loadCanals(String signalFileName){
+            if(!File.Exists(signalFileName)){
+                List<RequiredFilesMissingException.RequiredFiles> requiredFiles = new List<RequiredFilesMissingException.RequiredFiles>
+                {
+                    RequiredFilesMissingException.RequiredFiles.HEA
+                };
+                throw new RequiredFilesMissingException(requiredFiles);
+            }
+
             StreamReader strReader = new StreamReader(signalFileName);
             String line = strReader.ReadLine();
             List<String> firstLine = line.Split(' ').ToList();
@@ -43,8 +51,22 @@ namespace Visualiser.IO
         /// <returns>Generated ECG model.</returns>
         static public ECG loadECGFromSignalFile(String signalFileName, int channelToLoad = 1) 
         {
-            String type = signalFileName.Substring(signalFileName.Length - 4);
-            if (type == ".dat")
+            String route = signalFileName.Substring(0, signalFileName.Length - 4);
+            if (!File.Exists(route + ".dat") && !File.Exists(route + ".txt")) 
+            {
+                List<RequiredFilesMissingException.RequiredFiles> requiredFiles = new List<RequiredFilesMissingException.RequiredFiles>
+                {
+                    RequiredFilesMissingException.RequiredFiles.DAT,
+                    RequiredFilesMissingException.RequiredFiles.TXT
+                };
+                if(!File.Exists(route + ".atr"))
+                    requiredFiles.Add(RequiredFilesMissingException.RequiredFiles.ATR);
+
+                throw new RequiredFilesMissingException(requiredFiles);
+                
+            }
+                
+            if (File.Exists(route + ".dat"))
                 return loadECGFromSignalBinaryFile(signalFileName, channelToLoad);
             else
                 return loadECGFromSignalTextFile(signalFileName, channelToLoad);

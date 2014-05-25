@@ -8,7 +8,7 @@ namespace Visualiser.IO.Exceptions
 {
     public class RequiredFilesMissingException : Exception
     {
-        public enum RequiredFiles { DAT, HEA, ATR };
+        public enum RequiredFiles { DAT, HEA, ATR, TXT };
 
         public List<RequiredFiles> MissingFiles { get; set; }
 
