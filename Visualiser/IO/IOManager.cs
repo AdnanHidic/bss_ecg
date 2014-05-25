@@ -127,6 +127,88 @@ namespace Visualiser.IO
             // look for HEA ATR DAT & CUST on path etc.
         }
 
+        static private void loadStandardECGAnnotations(String atrFileName)
+        {
+            byte[] bytes = File.ReadAllBytes(@"C:\Projects\bss_ecg\Signals\100.atr");
+            int sampleTime = 0;
+            int num = 0;
+            int subtyp = 0;
+            int chan = 0;
+            bool increaseSampleTime = true;
+            String aux = "";
+
+            for (int i = 0; i < bytes.Length; i += 2)
+            {
+                aux = "";
+                subtyp = 0;
+                increaseSampleTime = true;
+
+                int A = bytes[i + 1] >> 2;
+                int I = (((bytes[i + 1] & 0x03) << 6) | bytes[i]);
+
+                switch (A)
+                {
+                    // SKIP
+                    case 59:
+                        if (I == 0)
+                        {
+                            // if I is 0, we should skip the next 4 bytes
+                            i += 2;
+                        }
+                        else
+                        {
+                            // otherwise we have to skip next I bytes
+                            i += I - 2;
+                        }
+                        increaseSampleTime = false;
+                        break;
+                    // NUM
+                    case 60:
+                        num = I;
+                        increaseSampleTime = false;
+                        break;
+                    // SUB      
+                    case 61:
+                        subtyp = I;
+                        increaseSampleTime = false;
+                        break;
+                    // CHAN
+                    case 62:
+                        chan = I;
+                        increaseSampleTime = false;
+                        break;
+                    // AUX
+                    case 63:
+                        for (int j = 0; j < I; j++)
+                        {
+                            // next I bytes are the aux string letters.
+                            // since we are reading two bytes at a time in main for loop, the aux string starts at (i+1)+1 position hence the: i+2+offset formula
+                            aux += Convert.ToChar(bytes[i + 2 + j]);
+                        }
+
+                        // if I is odd, there is a null byte pad appended to make the byte count even, but the null byte is not included in the byte count represented by I
+                        i += I + (I % 2 == 0 ? 0 : 1) - 2;
+
+                        increaseSampleTime = false;
+                        break;
+                    // EOF
+                    case 0:
+                        if (I == 0)
+                        {
+                            Console.WriteLine("End of signal");
+                            sampleTime = 0;
+                            increaseSampleTime = false;
+                        }
+                        break;
+                }
+
+                if (increaseSampleTime)
+                    sampleTime += I;
+
+                Console.WriteLine("A: " + A + " I: " + I + " Sample: " + sampleTime + " Chan: " + chan + " Subtyp: " + subtyp + " Num: " + num + " Aux: " + aux);
+            }
+        }
+
         static private ECG loadECGFromSignalTextFile(String signalFileName, int channelToLoad = 1)
         {
             String signal = signalFileName.Substring(0, signalFileName.Length - 4);

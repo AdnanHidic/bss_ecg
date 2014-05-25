@@ -94,6 +94,7 @@
     <Compile Include="Models\ECG.cs" />
     <Compile Include="Models\ECGAnnotation.cs" />
     <Compile Include="Models\ECGPoint.cs" />
+    <Compile Include="Models\MITAnnotation.cs" />
     <Compile Include="Processing\PanTompkins.cs" />
     <Compile Include="ViewModels\ECGView.xaml.cs">
       <DependentUpon>ECGView.xaml</DependentUpon>
