@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-
+using Visualiser.IO.Exceptions;
 using Visualiser.Models;
 
 namespace Visualiser.IO
@@ -21,6 +21,14 @@ namespace Visualiser.IO
         static private int ChannelNumber;
 
         static public List<String> loadCanals(String signalFileName){
+            if(!File.Exists(signalFileName)){
+                List<RequiredFilesMissingException.RequiredFiles> requiredFiles = new List<RequiredFilesMissingException.RequiredFiles>
+                {
+                    RequiredFilesMissingException.RequiredFiles.HEA
+                };
+                throw new RequiredFilesMissingException(requiredFiles);
+            }
+
             StreamReader strReader = new StreamReader(signalFileName);
             String line = strReader.ReadLine();
             List<String> firstLine = line.Split(' ').ToList();
@@ -43,8 +51,22 @@ namespace Visualiser.IO
         /// <returns>Generated ECG model.</returns>
         static public ECG loadECGFromSignalFile(String signalFileName, int channelToLoad = 1) 
         {
-            String type = signalFileName.Substring(signalFileName.Length - 4);
-            if (type == ".dat")
+            String route = signalFileName.Substring(0, signalFileName.Length - 4);
+            if (!File.Exists(route + ".dat") && !File.Exists(route + ".txt")) 
+            {
+                List<RequiredFilesMissingException.RequiredFiles> requiredFiles = new List<RequiredFilesMissingException.RequiredFiles>
+                {
+                    RequiredFilesMissingException.RequiredFiles.DAT,
+                    RequiredFilesMissingException.RequiredFiles.TXT
+                };
+                if(!File.Exists(route + ".atr"))
+                    requiredFiles.Add(RequiredFilesMissingException.RequiredFiles.ATR);
+
+                throw new RequiredFilesMissingException(requiredFiles);
+                
+            }
+                
+            if (File.Exists(route + ".dat"))
                 return loadECGFromSignalBinaryFile(signalFileName, channelToLoad);
             else
                 return loadECGFromSignalTextFile(signalFileName, channelToLoad);
@@ -123,6 +145,7 @@ namespace Visualiser.IO
             ecg.Name = signalFileName;
             ecg.Points = ecgPoints;
             ecg.SamplingRate = Frequency;
+            ecg.Channel = channelToLoad;
             return ecg;
             // look for HEA ATR DAT & CUST on path etc.
         }
@@ -245,6 +268,7 @@ namespace Visualiser.IO
             ecg.Name = signalFileName;
             ecg.Points = ecgPoints;
             ecg.SamplingRate = Frequency;
+            ecg.Channel = channelToLoad;
             return ecg;
         }
         /// <summary>
@@ -256,6 +280,48 @@ namespace Visualiser.IO
         {
             // save HEA ATR DAT & CUST
             throw new NotImplementedException();
+        }
+
+        static private void saveCustomAnnotations(ECG signal, String signalFileName) 
+        {
+            FileStream fileStream = new FileStream(signalFileName + ".cust", FileMode.Create);
+            StreamWriter streamWriter = new StreamWriter(fileStream);
+            List<ECGAnnotation> annotations = signal.Annotations;
+            foreach (var annotation in annotations) 
+            {
+                if (annotation.Type == ANNOTATION_TYPE.ANSWER || annotation.Type == ANNOTATION_TYPE.SOLUTION) 
+                {
+                    streamWriter.WriteLine("{0} {1} {2} {3}", annotation.Type,signal.Channel, annotation.TimeIndex, annotation.Text);
+                }
+            }
+            fileStream.Close();
+            streamWriter.Close();
+        }
+
+        static private List<ECGAnnotation> loadCustomAnnotations(String signalFileName) 
+        {
+            if(!File.Exists(signalFileName +".cust"))
+            {
+                return new List<ECGAnnotation>();
+            }
+            FileStream fileStream = new FileStream (signalFileName+".cust",FileMode.Open);
+            StreamReader streamReader = new StreamReader(fileStream);
+            String line = streamReader.ReadLine();
+            List<ECGAnnotation> annotations = new List<ECGAnnotation>();
+            while (line != null) 
+            {
+                List<String> list = line.Split(' ').ToList();
+                ECGAnnotation annotation = new ECGAnnotation()
+                {
+                    Type = (ANNOTATION_TYPE) Enum.Parse(typeof(ANNOTATION_TYPE),list[0].ToString()),
+                    TimeIndex = Convert.ToDouble(list[2]),
+                    Text = list[3]
+                };
+                annotations.Add(annotation);
+            }
+            fileStream.Close();
+            streamReader.Close();
+            return annotations;
         }
     }
 }
