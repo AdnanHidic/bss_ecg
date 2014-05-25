@@ -80,7 +80,7 @@ namespace Visualiser.IO
 
             if (File.Exists(route + ".cust"))
             {
-                //customAnnotations = loadCustomAnnotations(route + ".cust", channelToLoad);
+                customAnnotations = loadCustomAnnotations(route + ".cust", channelToLoad);
             }
 
             if (standardAnnotations != null)
@@ -352,7 +352,7 @@ namespace Visualiser.IO
 
         static private List<ECGAnnotation> loadCustomAnnotations(String signalFileName, int channel) 
         {
-            if(!File.Exists(signalFileName +".cust"))
+            if(!File.Exists(signalFileName))
             {
                 return new List<ECGAnnotation>();
             }
@@ -365,11 +365,12 @@ namespace Visualiser.IO
                 List<String> list = line.Split(' ').ToList();
                 if (list[1] == channel.ToString())
                 {
+                    List<String> help = list.GetRange(3, list.Count - 3);
                     ECGAnnotation annotation = new ECGAnnotation()
                     {
                         Type = (ANNOTATION_TYPE)Enum.Parse(typeof(ANNOTATION_TYPE), list[0].ToString()),
                         TimeIndex = Convert.ToDouble(list[2]),
-                        Text = list[3]
+                        Text = String.Join(String.Empty,help)
                     };
                     annotations.Add(annotation);
                 }
