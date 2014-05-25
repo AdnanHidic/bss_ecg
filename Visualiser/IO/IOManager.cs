@@ -71,13 +71,31 @@ namespace Visualiser.IO
                 ecg = loadECGFromSignalTextFile(signalFileName, channelToLoad);
 
             List<ECGAnnotation> standardAnnotations = null;
+            List<ECGAnnotation> customAnnotations = null;
 
             if (File.Exists(route + ".atr"))
             {
                 standardAnnotations = loadStandardAnnotations(route + ".atr", channelToLoad);
-                ecg.Annotations = standardAnnotations;
             }
 
+            if (File.Exists(route + ".cust"))
+            {
+                //customAnnotations = loadCustomAnnotations(route + ".cust", channelToLoad);
+            }
+
+            if (standardAnnotations != null)
+            {
+                if (customAnnotations != null)
+                    standardAnnotations.Concat(customAnnotations);
+
+                ecg.Annotations = standardAnnotations;
+            }
+            else
+            {
+                if (customAnnotations != null)
+                    ecg.Annotations = customAnnotations;
+            }
+            
             return ecg;
         }
 
