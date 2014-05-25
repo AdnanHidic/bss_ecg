@@ -153,7 +153,7 @@ namespace Visualiser.Views
                 string filename = dlg.FileName;
                 try
                 {
-                    signal = IOManager.loadECGFromSignalFile(filename);
+                    ecgView.ECGSignal = IOManager.loadECGFromSignalFile(filename);
                 }
                 catch (RequiredFilesMissingException ex)
                 {
