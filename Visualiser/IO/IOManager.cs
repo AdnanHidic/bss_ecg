@@ -74,7 +74,7 @@ namespace Visualiser.IO
 
             if (File.Exists(route + ".atr"))
             {
-                standardAnnotations = loadStandardAnnotations(route + ".atr", channelToLoad, ecg.SamplingRate);
+                standardAnnotations = loadStandardAnnotations(route + ".atr");
                 ecg.Annotations = standardAnnotations;
             }
 
@@ -159,7 +159,7 @@ namespace Visualiser.IO
             // look for HEA ATR DAT & CUST on path etc.
         }
 
-        static private List<ECGAnnotation> loadStandardAnnotations(String atrFileName, int channelToLoad, int fs)
+        static private List<ECGAnnotation> loadStandardAnnotations(String atrFileName)
         {
             List<ECGAnnotation> standardAnnotations = new List<ECGAnnotation>();
             byte[] bytes = File.ReadAllBytes(atrFileName);
@@ -244,14 +244,14 @@ namespace Visualiser.IO
 
                     annotation = new ECGAnnotation();
                     annotation.Type = ANNOTATION_TYPE.PHYSIONET_STANDARD;
-                    annotation.TimeIndex = sampleTime * (1.0 / fs);
+                    annotation.TimeIndex = sampleTime * (1.0 / Frequency);
                     annotation.Text = ECGAnnotation.getStandardAnnotationTextFromCode(A);
                     annotation.Aux = aux;
                     annotation.Chan = chan;
                     annotation.Num = num;
                     annotation.SubTyp = subtyp;
 
-                    if (annotation.Chan == (channelToLoad-1))
+                    if (annotation.Chan == (ChannelNumber-1))
                         standardAnnotations.Add(annotation);
                 }
                 else
