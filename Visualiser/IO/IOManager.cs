@@ -80,7 +80,7 @@ namespace Visualiser.IO
 
             if (File.Exists(route + ".cust"))
             {
-                //customAnnotations = loadCustomAnnotations(route + ".cust", channelToLoad);
+                customAnnotations = loadCustomAnnotations(route + ".cust", channelToLoad);
             }
 
             if (standardAnnotations != null)
@@ -282,6 +282,84 @@ namespace Visualiser.IO
             return standardAnnotations;
         }
 
+        static private void saveStandardAnnotations(ECG ecg, String atrFileName)
+        {
+            int sampleTime = 0;
+            int num = 0;
+            int chan = 0;
+            
+            FileStream fs = new FileStream(atrFileName+".atr", FileMode.Create);
+            BinaryWriter writer = new BinaryWriter(fs);
+            byte buf = 0x0;
+
+            for (int i = 0; i < ecg.Annotations.Count; i++)
+            {
+                ECGAnnotation annotation = ecg.Annotations.ElementAt(i);
+                if (annotation.Type == ANNOTATION_TYPE.PHYSIONET_STANDARD)
+                {
+                    sampleTime = Convert.ToInt32(annotation.TimeIndex * Frequency) - sampleTime;
+                    buf = Convert.ToByte(annotation.Code | Convert.ToByte((sampleTime << 6)));
+                    writer.Write(buf);
+                    buf = Convert.ToByte(sampleTime >> 2);
+                    writer.Write(buf);
+                    if (annotation.Aux.Length > 0)
+                    {
+                        buf = Convert.ToByte(annotation.Aux.Length);
+                        writer.Write(buf);
+                        buf = Convert.ToByte(Convert.ToByte(63 << 2) | (annotation.Aux.Length & 0xC0));
+                        writer.Write(buf);
+
+                        // write down AUX
+                        for (int j = 0; j < annotation.Aux.Length; j++)
+                        {
+                            writer.Write(Convert.ToByte(annotation.Aux[j]));
+                        }
+
+                        if (annotation.Aux.Length % 2 != 0)
+                        {
+                            writer.Write(0x0);
+                        }
+                    }
+
+                    if (annotation.SubTyp != 0)
+                    {
+                        // write down SUB
+                        buf = Convert.ToByte(annotation.SubTyp);
+                        writer.Write(buf);
+                        buf = Convert.ToByte(Convert.ToByte(61 << 2) | (annotation.SubTyp & 0xC0));
+                        writer.Write(buf);
+                    }
+
+                    if (annotation.Chan != chan)
+                    {
+                        chan = annotation.Chan;
+                        // write down new CHAN
+
+                        buf = Convert.ToByte(annotation.Chan);
+                        writer.Write(buf);
+                        buf = Convert.ToByte(Convert.ToByte(62 << 2) | (annotation.Chan & 0xC0));
+                        writer.Write(buf);
+                    }
+
+                    if (annotation.Num != num)
+                    {
+                        num = annotation.Num;
+                        // write down new NUM
+
+                        buf = Convert.ToByte(annotation.Num);
+                        writer.Write(buf);
+                        buf = Convert.ToByte(Convert.ToByte(60 << 2) | (annotation.Num & 0xC0));
+                        writer.Write(buf);
+                    }
+                }
+            }
+
+            // write EOF
+            buf = 0x0;
+            writer.Write(buf);
+            writer.Write(buf);
+        }
+
         static private ECG loadECGFromSignalTextFile(String signalFileName, int channelToLoad = 1)
         {
             String signal = signalFileName.Substring(0, signalFileName.Length - 4);
@@ -329,9 +407,13 @@ namespace Visualiser.IO
         static public void saveECGToSignalFiles(ECG signal, String signalFileName)
         {
             // save HEA ATR DAT & CUST
+
+            // save standard annotations
+            saveStandardAnnotations(signal, signalFileName);
+            
             //save cust
             saveCustomAnnotations(signal, signalFileName);
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         static private void saveCustomAnnotations(ECG signal, String signalFileName) 
@@ -352,7 +434,7 @@ namespace Visualiser.IO
 
         static private List<ECGAnnotation> loadCustomAnnotations(String signalFileName, int channel) 
         {
-            if(!File.Exists(signalFileName +".cust"))
+            if(!File.Exists(signalFileName))
             {
                 return new List<ECGAnnotation>();
             }
@@ -365,11 +447,12 @@ namespace Visualiser.IO
                 List<String> list = line.Split(' ').ToList();
                 if (list[1] == channel.ToString())
                 {
+                    List<String> help = list.GetRange(3, list.Count - 3);
                     ECGAnnotation annotation = new ECGAnnotation()
                     {
                         Type = (ANNOTATION_TYPE)Enum.Parse(typeof(ANNOTATION_TYPE), list[0].ToString()),
                         TimeIndex = Convert.ToDouble(list[2]),
-                        Text = list[3]
+                        Text = String.Join(String.Empty,help)
                     };
                     annotations.Add(annotation);
                 }
