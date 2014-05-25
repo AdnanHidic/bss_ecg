@@ -96,6 +96,14 @@ namespace Visualiser.Views
                         Type = selectedType,
                         TimeIndex = timeIndex
                     };
+
+                    if (annot.Type == ANNOTATION_TYPE.PHYSIONET_STANDARD)
+                    {
+                        // set the MIT annotation specific values
+                        annot.Code = ECGAnnotation.getCodeFromStandardAnnotationText(annot.Text);
+                        annot.Aux = "";
+                    }
+
                     MessageBox.Show("Insertion successful!");
                     OnAnnotationInsertRequested(annot);
                 }

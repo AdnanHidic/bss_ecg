@@ -298,6 +298,8 @@ namespace Visualiser.IO
             byte nul = Convert.ToByte(0x0);
             int previousSampleTime = 0;
 
+            ecg.Annotations = ecg.Annotations.OrderBy(an => an.TimeIndex).ToList();
+
             for (int i = 0; i < ecg.Annotations.Count; i++)
             {
                 ECGAnnotation annotation = ecg.Annotations.ElementAt(i);
@@ -308,14 +310,14 @@ namespace Visualiser.IO
 
                     buf = Convert.ToByte(sampleTime & 0xFF);
                     writer.Write(buf);
-                    buf = Convert.ToByte(Convert.ToByte((annotation.Code << 2) & 0xFF) | (Convert.ToByte((sampleTime) >> 8) & 0x3));
+                    buf = Convert.ToByte(Convert.ToByte((annotation.Code << 2) & 0xFF) | (Convert.ToByte((sampleTime >> 8) & 0xFF) & 0x3));
                     writer.Write(buf);
 
-                    if (annotation.Aux.Length > 0)
+                    if (annotation.Aux != null && annotation.Aux.Length > 0)
                     {
                         buf = Convert.ToByte((annotation.Aux.Length+1) & 0xFF);
                         writer.Write(buf);
-                        buf = Convert.ToByte(Convert.ToByte((63 << 2) & 0xFF) | (Convert.ToByte((annotation.Aux.Length + 1) >> 8) & 0x3));
+                        buf = Convert.ToByte(Convert.ToByte((63 << 2) & 0xFF) | (Convert.ToByte(((annotation.Aux.Length + 1) >> 8) & 0xFF) & 0x3));
                         writer.Write(buf);
 
                         // write down AUX
@@ -337,18 +339,18 @@ namespace Visualiser.IO
                         // write down SUB
                         buf = Convert.ToByte(annotation.SubTyp & 0xFF);
                         writer.Write(buf);
-                        buf = Convert.ToByte(Convert.ToByte((61 << 2) & 0xFF) | (Convert.ToByte(annotation.SubTyp >> 8) & 0x3));
+                        buf = Convert.ToByte(Convert.ToByte((61 << 2) & 0xFF) | (Convert.ToByte((annotation.SubTyp >> 8) & 0xFF) & 0x3));
                         writer.Write(buf);
                     }
 
-                    if (annotation.Chan != chan)
+                    if ((ecg.Channel-1) != chan)
                     {
-                        chan = annotation.Chan;
+                        chan = (ecg.Channel - 1);
                         // write down new CHAN
 
-                        buf = Convert.ToByte(annotation.Chan & 0xFF);
+                        buf = Convert.ToByte(chan & 0xFF);
                         writer.Write(buf);
-                        buf = Convert.ToByte(Convert.ToByte((62 << 2) & 0xFF) | (Convert.ToByte(annotation.Chan >> 8) & 0x3));
+                        buf = Convert.ToByte(Convert.ToByte((62 << 2) & 0xFF) | (Convert.ToByte((chan >> 8) & 0xFF) & 0x3));
                         writer.Write(buf);
                     }
 
@@ -359,7 +361,7 @@ namespace Visualiser.IO
 
                         buf = Convert.ToByte(annotation.Num & 0xFF);
                         writer.Write(buf);
-                        buf = Convert.ToByte(Convert.ToByte((60 << 2) & 0xFF) | (Convert.ToByte(annotation.Num >> 8) & 0x3));
+                        buf = Convert.ToByte(Convert.ToByte((60 << 2) & 0xFF) | (Convert.ToByte((annotation.Num >> 8) & 0xFF) & 0x3));
                         writer.Write(buf);
                     }
                 }
@@ -420,11 +422,10 @@ namespace Visualiser.IO
             // save HEA ATR DAT & CUST
 
             // save standard annotations
-            saveStandardAnnotations(signal, signalFileName);
+            saveStandardAnnotations(signal, signalFileName.Substring(0, signalFileName.Length-4));
             
-            //save cust
-            saveCustomAnnotations(signal, signalFileName);
-            //throw new NotImplementedException();
+            //save custom annotations
+            saveCustomAnnotations(signal, signalFileName.Substring(0, signalFileName.Length - 4));
         }
 
         static private void saveCustomAnnotations(ECG signal, String signalFileName) 
@@ -448,7 +449,7 @@ namespace Visualiser.IO
             {
                 return new List<ECGAnnotation>();
             }
-            FileStream fileStream = new FileStream (signalFileName+".cust",FileMode.Open);
+            FileStream fileStream = new FileStream (signalFileName,FileMode.Open);
             StreamReader streamReader = new StreamReader(fileStream);
             String line = streamReader.ReadLine();
             List<ECGAnnotation> annotations = new List<ECGAnnotation>();
