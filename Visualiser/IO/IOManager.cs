@@ -145,6 +145,7 @@ namespace Visualiser.IO
             ecg.Name = signalFileName;
             ecg.Points = ecgPoints;
             ecg.SamplingRate = Frequency;
+            ecg.Channel = channelToLoad;
             return ecg;
             // look for HEA ATR DAT & CUST on path etc.
         }
@@ -185,6 +186,7 @@ namespace Visualiser.IO
             ecg.Name = signalFileName;
             ecg.Points = ecgPoints;
             ecg.SamplingRate = Frequency;
+            ecg.Channel = channelToLoad;
             return ecg;
         }
         /// <summary>
@@ -196,6 +198,48 @@ namespace Visualiser.IO
         {
             // save HEA ATR DAT & CUST
             throw new NotImplementedException();
+        }
+
+        static private void saveCustomAnnotations(ECG signal, String signalFileName) 
+        {
+            FileStream fileStream = new FileStream(signalFileName + ".cust", FileMode.Create);
+            StreamWriter streamWriter = new StreamWriter(fileStream);
+            List<ECGAnnotation> annotations = signal.Annotations;
+            foreach (var annotation in annotations) 
+            {
+                if (annotation.Type == ANNOTATION_TYPE.ANSWER || annotation.Type == ANNOTATION_TYPE.SOLUTION) 
+                {
+                    streamWriter.WriteLine("{0} {1} {2} {3}", annotation.Type,signal.Channel, annotation.TimeIndex, annotation.Text);
+                }
+            }
+            fileStream.Close();
+            streamWriter.Close();
+        }
+
+        static private List<ECGAnnotation> loadCustomAnnotations(String signalFileName) 
+        {
+            if(!File.Exists(signalFileName +".cust"))
+            {
+                return new List<ECGAnnotation>();
+            }
+            FileStream fileStream = new FileStream (signalFileName+".cust",FileMode.Open);
+            StreamReader streamReader = new StreamReader(fileStream);
+            String line = streamReader.ReadLine();
+            List<ECGAnnotation> annotations = new List<ECGAnnotation>();
+            while (line != null) 
+            {
+                List<String> list = line.Split(' ').ToList();
+                ECGAnnotation annotation = new ECGAnnotation()
+                {
+                    Type = (ANNOTATION_TYPE) Enum.Parse(typeof(ANNOTATION_TYPE),list[0].ToString()),
+                    TimeIndex = Convert.ToDouble(list[2]),
+                    Text = list[3]
+                };
+                annotations.Add(annotation);
+            }
+            fileStream.Close();
+            streamReader.Close();
+            return annotations;
         }
     }
 }
