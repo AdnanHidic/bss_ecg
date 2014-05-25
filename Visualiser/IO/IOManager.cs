@@ -118,6 +118,44 @@ namespace Visualiser.IO
             // look for HEA ATR DAT & CUST on path etc.
         }
 
+        static public ECG loadECGFromSignalTextFile(String signalFileName, int channelToLoad = 1)
+        {
+            String signal = signalFileName.Substring(0, signalFileName.Length - 4);
+            //Frequency  = 360;
+            FileStream file = new FileStream(signal + ".txt", FileMode.Open);
+            StreamReader streamReader = new StreamReader(file);
+            List<ECGPoint> ecgPoints = new List<ECGPoint>();
+            string line = "";
+            line = streamReader.ReadLine();
+            int count = 0;
+            while (!(line.Contains("0.000")))
+            {
+                if (line == null)
+                    break;
+                try
+                {
+                    line = streamReader.ReadLine();
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine(ecgPoints.ToString());
+                }
+            }
+
+            do
+            {
+                ECGPoint ecgPoint = new ECGPoint();
+                ecgPoint.Value = (double.Parse(line.Split('\t')[channelToLoad]));
+                ecgPoint.TimeIndex = count / Convert.ToDouble(Frequency);
+                ecgPoints.Add(ecgPoint);
+            } while ((line = streamReader.ReadLine()) != null);
+            file.Close();
+            streamReader.Close();
+            ECG ecg = new ECG();
+            ecg.Name = signalFileName;
+            ecg.Points = ecgPoints;
+            return ecg;
+        }
         /// <summary>
         /// Used to save ECG signal model to PhysioNet signal files. Method generates .HEA, .DAT and .ATR files 
         /// with the name given as method call parameter.
