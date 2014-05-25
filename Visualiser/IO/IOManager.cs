@@ -282,15 +282,15 @@ namespace Visualiser.IO
             return standardAnnotations;
         }
 
-        static private void saveStandardAnnotations(String atrFileName, ECG ecg)
+        static private void saveStandardAnnotations(ECG ecg, String atrFileName)
         {
             int sampleTime = 0;
             int num = 0;
-            int subtyp = 0;
             int chan = 0;
             
-            FileStream fs = new FileStream(atrFileName, FileMode.Create);
+            FileStream fs = new FileStream(atrFileName+".atr", FileMode.Create);
             BinaryWriter writer = new BinaryWriter(fs);
+            byte buf = 0x0;
 
             for (int i = 0; i < ecg.Annotations.Count; i++)
             {
@@ -298,116 +298,66 @@ namespace Visualiser.IO
                 if (annotation.Type == ANNOTATION_TYPE.PHYSIONET_STANDARD)
                 {
                     sampleTime = Convert.ToInt32(annotation.TimeIndex * Frequency) - sampleTime;
-                    byte buf = Convert.ToByte(annotation.Code | Convert.ToByte((sampleTime << 6)));
+                    buf = Convert.ToByte(annotation.Code | Convert.ToByte((sampleTime << 6)));
                     writer.Write(buf);
                     buf = Convert.ToByte(sampleTime >> 2);
                     writer.Write(buf);
                     if (annotation.Aux.Length > 0)
                     {
+                        buf = Convert.ToByte(annotation.Aux.Length);
+                        writer.Write(buf);
+                        buf = Convert.ToByte(Convert.ToByte(63 << 2) | (annotation.Aux.Length & 0xC0));
+                        writer.Write(buf);
+
                         // write down AUX
+                        for (int j = 0; j < annotation.Aux.Length; j++)
+                        {
+                            writer.Write(Convert.ToByte(annotation.Aux[j]));
+                        }
+
+                        if (annotation.Aux.Length % 2 != 0)
+                        {
+                            writer.Write(0x0);
+                        }
                     }
 
                     if (annotation.SubTyp != 0)
                     {
                         // write down SUB
+                        buf = Convert.ToByte(annotation.SubTyp);
+                        writer.Write(buf);
+                        buf = Convert.ToByte(Convert.ToByte(61 << 2) | (annotation.SubTyp & 0xC0));
+                        writer.Write(buf);
                     }
 
                     if (annotation.Chan != chan)
                     {
                         chan = annotation.Chan;
                         // write down new CHAN
+
+                        buf = Convert.ToByte(annotation.Chan);
+                        writer.Write(buf);
+                        buf = Convert.ToByte(Convert.ToByte(62 << 2) | (annotation.Chan & 0xC0));
+                        writer.Write(buf);
                     }
 
                     if (annotation.Num != num)
                     {
                         num = annotation.Num;
                         // write down new NUM
+
+                        buf = Convert.ToByte(annotation.Num);
+                        writer.Write(buf);
+                        buf = Convert.ToByte(Convert.ToByte(60 << 2) | (annotation.Num & 0xC0));
+                        writer.Write(buf);
                     }
                 }
             }
 
-          
-            bool increaseSampleTime = true;
-            
-            String aux = "";
-
-            for (int i = 0; i < bytes.Length; i += 2)
-            {
-                aux = "";
-                subtyp = 0;
-                increaseSampleTime = true;
-
-                int A = bytes[i + 1] >> 2;
-                int I = (((bytes[i + 1] & 0x03) << 6) | bytes[i]);
-
-                switch (A)
-                {
-                    // NUM
-                    case 60:
-                        num = I;
-                        annotation.Num = num;
-                        increaseSampleTime = false;
-                        break;
-                    // SUB      
-                    case 61:
-                        subtyp = I;
-                        annotation.SubTyp = subtyp;
-                        increaseSampleTime = false;
-                        break;
-                    // CHAN
-                    case 62:
-                        chan = I;
-                        annotation.Chan = chan;
-                        increaseSampleTime = false;
-                        break;
-                    // AUX
-                    case 63:
-                        for (int j = 0; j < I; j++)
-                        {
-                            // next I bytes are the aux string letters.
-                            // since we are reading two bytes at a time in main for loop, the aux string starts at (i+1)+1 position hence the: i+2+offset formula
-                            aux += Convert.ToChar(bytes[i + 2 + j]);
-                        }
-
-                        // if I is odd, there is a null byte pad appended to make the byte count even, but the null byte is not included in the byte count represented by I
-                        i += I + (I % 2 == 0 ? 0 : 1);
-
-                        annotation.Aux = aux;
-                        increaseSampleTime = false;
-                        break;
-                    // EOF
-                    case 0:
-                        if (I == 0)
-                        {
-                            return standardAnnotations;
-                        }
-                        break;
-                }
-
-                if (increaseSampleTime)
-                {
-                    sampleTime += I;
-
-                    annotation = new ECGAnnotation();
-                    annotation.Type = ANNOTATION_TYPE.PHYSIONET_STANDARD;
-                    annotation.TimeIndex = sampleTime * (1.0 / Frequency);
-                    annotation.Text = ECGAnnotation.getStandardAnnotationTextFromCode(A);
-                    annotation.Aux = aux;
-                    annotation.Chan = chan;
-                    annotation.Num = num;
-                    annotation.SubTyp = subtyp;
-
-                    if (annotation.Chan == (channelToLoad - 1))
-                        standardAnnotations.Add(annotation);
-                }
-                else
-                {
-                    if (aux.Length > 0)
-                        annotation.Text += " " + aux;
-                }
-            }
-
-            return standardAnnotations;
+            // write EOF
+            buf = 0x0;
+            writer.Write(buf);
+            writer.Write(buf);
         }
 
         static private ECG loadECGFromSignalTextFile(String signalFileName, int channelToLoad = 1)
@@ -457,9 +407,13 @@ namespace Visualiser.IO
         static public void saveECGToSignalFiles(ECG signal, String signalFileName)
         {
             // save HEA ATR DAT & CUST
+
+            // save standard annotations
+            saveStandardAnnotations(signal, signalFileName);
+            
             //save cust
             saveCustomAnnotations(signal, signalFileName);
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         static private void saveCustomAnnotations(ECG signal, String signalFileName) 
