@@ -74,7 +74,7 @@ namespace Visualiser.IO
 
             if (File.Exists(route + ".atr"))
             {
-                standardAnnotations = loadStandardAnnotations(route + ".atr");
+                standardAnnotations = loadStandardAnnotations(route + ".atr", channelToLoad);
                 ecg.Annotations = standardAnnotations;
             }
 
@@ -159,7 +159,7 @@ namespace Visualiser.IO
             // look for HEA ATR DAT & CUST on path etc.
         }
 
-        static private List<ECGAnnotation> loadStandardAnnotations(String atrFileName)
+        static private List<ECGAnnotation> loadStandardAnnotations(String atrFileName, int channelToLoad = 1)
         {
             List<ECGAnnotation> standardAnnotations = new List<ECGAnnotation>();
             byte[] bytes = File.ReadAllBytes(atrFileName);
@@ -251,7 +251,7 @@ namespace Visualiser.IO
                     annotation.Num = num;
                     annotation.SubTyp = subtyp;
 
-                    if (annotation.Chan == (ChannelNumber-1))
+                    if (annotation.Chan == (channelToLoad - 1))
                         standardAnnotations.Add(annotation);
                 }
                 else
