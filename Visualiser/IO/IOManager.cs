@@ -59,17 +59,26 @@ namespace Visualiser.IO
                     RequiredFilesMissingException.RequiredFiles.DAT,
                     RequiredFilesMissingException.RequiredFiles.TXT
                 };
-                if(!File.Exists(route + ".atr"))
-                    requiredFiles.Add(RequiredFilesMissingException.RequiredFiles.ATR);
-
+                
                 throw new RequiredFilesMissingException(requiredFiles);
-                
             }
-                
+
+            ECG ecg = null;
+
             if (File.Exists(route + ".dat"))
-                return loadECGFromSignalBinaryFile(signalFileName, channelToLoad);
+                ecg = loadECGFromSignalBinaryFile(signalFileName, channelToLoad);
             else
-                return loadECGFromSignalTextFile(signalFileName, channelToLoad);
+                ecg = loadECGFromSignalTextFile(signalFileName, channelToLoad);
+
+            List<ECGAnnotation> standardAnnotations = null;
+
+            if (File.Exists(route + ".atr"))
+            {
+                standardAnnotations = loadStandardAnnotations(route + ".atr", channelToLoad, ecg.SamplingRate);
+                ecg.Annotations = standardAnnotations;
+            }
+
+            return ecg;
         }
 
         static private ECG loadECGFromSignalBinaryFile(String signalFileName, int channelToLoad=1)
@@ -150,14 +159,16 @@ namespace Visualiser.IO
             // look for HEA ATR DAT & CUST on path etc.
         }
 
-        static private void loadStandardECGAnnotations(String atrFileName)
+        static private List<ECGAnnotation> loadStandardAnnotations(String atrFileName, int channelToLoad, int fs)
         {
-            byte[] bytes = File.ReadAllBytes(@"C:\Projects\bss_ecg\Signals\100.atr");
+            List<ECGAnnotation> standardAnnotations = new List<ECGAnnotation>();
+            byte[] bytes = File.ReadAllBytes(atrFileName);
             int sampleTime = 0;
             int num = 0;
             int subtyp = 0;
             int chan = 0;
             bool increaseSampleTime = true;
+            ECGAnnotation annotation = null;
             String aux = "";
 
             for (int i = 0; i < bytes.Length; i += 2)
@@ -176,28 +187,31 @@ namespace Visualiser.IO
                         if (I == 0)
                         {
                             // if I is 0, we should skip the next 4 bytes
-                            i += 2;
+                            i += 4;
                         }
                         else
                         {
                             // otherwise we have to skip next I bytes
-                            i += I - 2;
+                            i += I;
                         }
                         increaseSampleTime = false;
                         break;
                     // NUM
                     case 60:
                         num = I;
+                        annotation.Num = num;
                         increaseSampleTime = false;
                         break;
                     // SUB      
                     case 61:
                         subtyp = I;
+                        annotation.SubTyp = subtyp;
                         increaseSampleTime = false;
                         break;
                     // CHAN
                     case 62:
                         chan = I;
+                        annotation.Chan = chan;
                         increaseSampleTime = false;
                         break;
                     // AUX
@@ -210,26 +224,44 @@ namespace Visualiser.IO
                         }
 
                         // if I is odd, there is a null byte pad appended to make the byte count even, but the null byte is not included in the byte count represented by I
-                        i += I + (I % 2 == 0 ? 0 : 1) - 2;
+                        i += I + (I % 2 == 0 ? 0 : 1);
 
+                        annotation.Aux = aux;
                         increaseSampleTime = false;
                         break;
                     // EOF
                     case 0:
                         if (I == 0)
                         {
-                            Console.WriteLine("End of signal");
-                            sampleTime = 0;
-                            increaseSampleTime = false;
+                            return standardAnnotations;
                         }
                         break;
                 }
 
                 if (increaseSampleTime)
+                {
                     sampleTime += I;
 
-                Console.WriteLine("A: " + A + " I: " + I + " Sample: " + sampleTime + " Chan: " + chan + " Subtyp: " + subtyp + " Num: " + num + " Aux: " + aux);
+                    annotation = new ECGAnnotation();
+                    annotation.Type = ANNOTATION_TYPE.PHYSIONET_STANDARD;
+                    annotation.TimeIndex = sampleTime * (1.0 / fs);
+                    annotation.Text = ECGAnnotation.getStandardAnnotationTextFromCode(A);
+                    annotation.Aux = aux;
+                    annotation.Chan = chan;
+                    annotation.Num = num;
+                    annotation.SubTyp = subtyp;
+
+                    if (annotation.Chan == (channelToLoad-1))
+                        standardAnnotations.Add(annotation);
+                }
+                else
+                {
+                    if (aux.Length > 0)
+                        annotation.Text += " " + aux;
+                }
             }
+
+            return standardAnnotations;
         }
 
         static private ECG loadECGFromSignalTextFile(String signalFileName, int channelToLoad = 1)

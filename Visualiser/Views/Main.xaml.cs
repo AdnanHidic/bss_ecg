@@ -35,8 +35,8 @@ namespace Visualiser.Views
         {
             BeforeInitializeComponent();
             InitializeComponent();
-            //AfterInitializeComponent();
-            StaticAfterInitializeComponent();
+            AfterInitializeComponent();
+            //StaticAfterInitializeComponent();
         }
 
         private void BeforeInitializeComponent()
