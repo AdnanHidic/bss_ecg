@@ -41,7 +41,7 @@ namespace Visualiser.IO
         /// </summary>
         /// <param name="signalFileName">Full path to the HEA file (e.g. C:\100.HEA)</param>
         /// <returns>Generated ECG model.</returns>
-        static public ECG loadECGFromSignalFile(String signalFileName, int channelToLoad = 1) 
+        static public ECG loadECGFromSignalFile(String signalFileName, int channelToLoad = 1)
         {
             String type = signalFileName.Substring(signalFileName.Length - 4);
             if (type == ".dat")
