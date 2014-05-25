@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -46,7 +47,7 @@ namespace Visualiser.Views
 
         private void StaticAfterInitializeComponent()
         {
-            String[] values = File.ReadAllText(@"C:\Users\XZone\Desktop\moar.csv").Replace("\r\n",";").Split(';');
+            String[] values = File.ReadAllText(@"C:\Projects\moar.csv").Replace("\r\n", ";").Split(';');
             List<double> points = new List<double>();
             for (int i = 1; i < values.Length; i += 3)
             {
