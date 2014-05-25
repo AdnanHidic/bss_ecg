@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300" MinWidth="200" MinHeight="200">
     <Grid>
-        <oxy:Plot x:Name="ECGPlot">
+        <oxy:Plot x:Name="ECGPlot" PreviewMouseMove="ECGPlot_PreviewMouseMove">
         </oxy:Plot>
     </Grid>
 </UserControl>

@@ -457,6 +457,8 @@ namespace Visualiser.IO
         static public void saveECGToSignalFiles(ECG signal, String signalFileName)
         {
             // save HEA ATR DAT & CUST
+            //save cust
+            saveCustomAnnotations(signal, signalFileName);
             throw new NotImplementedException();
         }
 
@@ -476,7 +478,7 @@ namespace Visualiser.IO
             streamWriter.Close();
         }
 
-        static private List<ECGAnnotation> loadCustomAnnotations(String signalFileName) 
+        static private List<ECGAnnotation> loadCustomAnnotations(String signalFileName, int channel) 
         {
             if(!File.Exists(signalFileName +".cust"))
             {
@@ -489,13 +491,16 @@ namespace Visualiser.IO
             while (line != null) 
             {
                 List<String> list = line.Split(' ').ToList();
-                ECGAnnotation annotation = new ECGAnnotation()
+                if (list[1] == channel.ToString())
                 {
-                    Type = (ANNOTATION_TYPE) Enum.Parse(typeof(ANNOTATION_TYPE),list[0].ToString()),
-                    TimeIndex = Convert.ToDouble(list[2]),
-                    Text = list[3]
-                };
-                annotations.Add(annotation);
+                    ECGAnnotation annotation = new ECGAnnotation()
+                    {
+                        Type = (ANNOTATION_TYPE)Enum.Parse(typeof(ANNOTATION_TYPE), list[0].ToString()),
+                        TimeIndex = Convert.ToDouble(list[2]),
+                        Text = list[3]
+                    };
+                    annotations.Add(annotation);
+                }
             }
             fileStream.Close();
             streamReader.Close();
