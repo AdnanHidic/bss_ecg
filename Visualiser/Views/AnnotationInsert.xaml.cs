@@ -24,9 +24,25 @@ namespace Visualiser.Views
         public delegate void AnnotationInsertRequestedHandler(ECGAnnotation annotation);
         public event AnnotationInsertRequestedHandler annotationInsertRequested;
 
+        private Boolean HasBeenInitialized;
+
         public AnnotationInsert()
         {
+            HasBeenInitialized = false;
+
             InitializeComponent();
+
+            tb_content.Visibility = Visibility.Hidden;
+            cb_standard_content.Visibility = Visibility.Visible;
+
+            ECGAnnotation.StandardAnnotationCodesAndDescs.ForEach(
+                tuple =>
+                {
+                    cb_standard_content.Items.Add(tuple.Item2);
+                });
+            cb_standard_content.SelectedIndex = 0;
+
+            HasBeenInitialized = true;
         }
 
         private void Close_Button_Click(object sender, RoutedEventArgs e)
@@ -37,7 +53,16 @@ namespace Visualiser.Views
         private void Insert_Button_Click(object sender, RoutedEventArgs e)
         {
             ANNOTATION_TYPE selectedType = (ANNOTATION_TYPE)cb_annotationType.SelectedItem;
-            String content = tb_content.Text;
+            String content = "";
+            if (selectedType == ANNOTATION_TYPE.PHYSIONET_STANDARD)
+            {
+                content = cb_standard_content.SelectedItem as String;
+            }
+            else
+            {
+                content = tb_content.Text;
+            }
+
             String[] timestampStrings = tb_timestamp.Text.Split(':');
 
             if (content.Length == 0)
@@ -85,6 +110,22 @@ namespace Visualiser.Views
         {
             if (annotationInsertRequested != null)
                 annotationInsertRequested(annotation);
+        }
+
+        private void cb_annotationType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!HasBeenInitialized)
+                return;
+
+            if ((ANNOTATION_TYPE)cb_annotationType.SelectedItem == ANNOTATION_TYPE.PHYSIONET_STANDARD ){
+                tb_content.Visibility = Visibility.Hidden;
+                cb_standard_content.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                tb_content.Visibility = Visibility.Visible;
+                cb_standard_content.Visibility = Visibility.Hidden;
+            }
         }
     }
 }

@@ -41,90 +41,68 @@ namespace Visualiser.Models
             return "Type " + Type + " at " + TimeIndex+ " [seconds]";
         }
 
+        static public List<Tuple<int,String>> StandardAnnotationCodesAndDescs = new List<Tuple<int,String>>()
+        {
+            new Tuple<int,String>(1,"NORMAL"),
+            new Tuple<int,String>(2,"LBBB"),
+            new Tuple<int,String>(3,"RBBB"),
+            new Tuple<int,String>(4,"ABERR"),
+            new Tuple<int,String>(5,"PVC"),
+            new Tuple<int,String>(6,"FUSION"),
+            new Tuple<int,String>(7,"NPC"),
+            new Tuple<int,String>(8,"APC"),
+            new Tuple<int,String>(9,"SVPB"),
+            new Tuple<int,String>(10,"VESC"),
+            new Tuple<int,String>(11,"NESC"),
+            new Tuple<int,String>(12,"PACE"),
+            new Tuple<int,String>(13,"UNKNOWN"),
+            new Tuple<int,String>(14,"NOISE"),
+            new Tuple<int,String>(16,"ARFCT"),
+            new Tuple<int,String>(18,"STCH"),
+            new Tuple<int,String>(19,"TCH"),
+            new Tuple<int,String>(20,"SYSTOLE"),
+            new Tuple<int,String>(21,"DIASTOLE"),
+            new Tuple<int,String>(22,"NOTE"),
+            new Tuple<int,String>(23,"MEASURE"),
+            new Tuple<int,String>(24,"PWAVE"),
+            new Tuple<int,String>(25,"BBB"),
+            new Tuple<int,String>(26,"PACESP"),
+            new Tuple<int,String>(27,"TWAVE"),
+            new Tuple<int,String>(28,"RHYTHM"),
+            new Tuple<int,String>(29,"UWAVE"),
+            new Tuple<int,String>(30,"LEARN"),
+            new Tuple<int,String>(31,"FLWAV"),
+            new Tuple<int,String>(32,"VFON"),
+            new Tuple<int,String>(33,"VFOFF"),
+            new Tuple<int,String>(34,"AESC"),
+            new Tuple<int,String>(35,"SVESC"),
+            new Tuple<int,String>(36,"LINK"),
+            new Tuple<int,String>(37,"NAPC"),
+            new Tuple<int,String>(38,"PFUS"),
+            new Tuple<int,String>(39,"WFON"),
+            new Tuple<int,String>(40,"WFOFF"),
+            new Tuple<int,String>(41,"RONT")
+        };
+
         static public String getStandardAnnotationTextFromCode(int annotationCode)
         {
-            switch(annotationCode)
+            try {
+                return StandardAnnotationCodesAndDescs.First(pair => { return pair.Item1 == annotationCode; }).Item2;
+            }
+            catch(Exception){
+                return "";
+            }
+        }
+
+        static public int getCodeFromStandardAnnotationText(String annotationText)
+        {
+            try
             {
-                case 1:
-                    return "NORMAL";
-                case 2:
-                    return "LBBB";
-                case 3:
-                    return "RBBB";
-                case 4:
-                    return "ABERR";
-                case 5:
-                    return "PVC";
-                case 6:
-                    return "FUSION";
-                case 7:
-                    return "NPC";
-                case 8:
-                    return "APC";
-                case 9:
-                    return "SVPB";
-                case 10:
-                    return "VESC";
-                case 11:
-                    return "NESC";
-                case 12:
-                    return "PACE";
-                case 13:
-                    return "UNKNOWN";
-                case 14:
-                    return "NOISE";
-                case 16:
-                    return "ARFCT";
-                case 18:
-                    return "STCH";
-                case 19:
-                    return "TCH";
-                case 20:
-                    return "SYSTOLE";
-                case 21:
-                    return "DIASTOLE";
-                case 22:
-                    return "NOTE";
-                case 23:
-                    return "MEASURE";
-                case 24:
-                    return "PWAVE";
-                case 25:
-                    return "BBB";
-                case 26:
-                    return "PACESP";
-                case 27:
-                    return "TWAVE";
-                case 28:
-                    return "RHYTHM";
-                case 29: 
-                    return "UWAVE";
-                case 30:
-                    return "LEARN";
-                case 31:
-                    return "FLWAV";
-                case 32:
-                    return "VFON";
-                case 33:
-                    return "VFOFF";
-                case 34:
-                    return "AESC";
-                case 35:
-                    return "SVESC";
-                case 36:
-                    return "LINK";
-                case 37:
-                    return "NAPC";
-                case 38:
-                    return "PFUS";
-                case 39:
-                    return "WFON";
-                case 40:
-                    return "WFOFF";
-                case 41:
-                    return "RONT";
-                default:
-                    return "";
+                return StandardAnnotationCodesAndDescs.First(pair => { return pair.Item2 == annotationText; }).Item1;
+            }
+            catch (Exception)
+            {
+                return -1;
             }
         }
     }
