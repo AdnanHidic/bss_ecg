@@ -453,7 +453,8 @@ namespace Visualiser.IO
             StreamReader streamReader = new StreamReader(fileStream);
             String line = streamReader.ReadLine();
             List<ECGAnnotation> annotations = new List<ECGAnnotation>();
-            while (line != null) 
+            
+            while(line != null) 
             {
                 List<String> list = line.Split(' ').ToList();
                 if (list[1] == channel.ToString())
@@ -467,8 +468,10 @@ namespace Visualiser.IO
                     };
                     annotations.Add(annotation);
                 }
+
+                // read next line
+                line = streamReader.ReadLine();
             }
-            fileStream.Close();
             streamReader.Close();
             return annotations;
         }
