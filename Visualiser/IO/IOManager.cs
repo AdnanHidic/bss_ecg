@@ -282,6 +282,134 @@ namespace Visualiser.IO
             return standardAnnotations;
         }
 
+        static private void saveStandardAnnotations(String atrFileName, ECG ecg)
+        {
+            int sampleTime = 0;
+            int num = 0;
+            int subtyp = 0;
+            int chan = 0;
+            
+            FileStream fs = new FileStream(atrFileName, FileMode.Create);
+            BinaryWriter writer = new BinaryWriter(fs);
+
+            for (int i = 0; i < ecg.Annotations.Count; i++)
+            {
+                ECGAnnotation annotation = ecg.Annotations.ElementAt(i);
+                if (annotation.Type == ANNOTATION_TYPE.PHYSIONET_STANDARD)
+                {
+                    sampleTime = Convert.ToInt32(annotation.TimeIndex * Frequency) - sampleTime;
+                    byte buf = Convert.ToByte(annotation.Code | Convert.ToByte((sampleTime << 6)));
+                    writer.Write(buf);
+                    buf = Convert.ToByte(sampleTime >> 2);
+                    writer.Write(buf);
+                    if (annotation.Aux.Length > 0)
+                    {
+                        // write down AUX
+                    }
+
+                    if (annotation.SubTyp != 0)
+                    {
+                        // write down SUB
+                    }
+
+                    if (annotation.Chan != chan)
+                    {
+                        chan = annotation.Chan;
+                        // write down new CHAN
+                    }
+
+                    if (annotation.Num != num)
+                    {
+                        num = annotation.Num;
+                        // write down new NUM
+                    }
+                }
+            }
+
+          
+            bool increaseSampleTime = true;
+            
+            String aux = "";
+
+            for (int i = 0; i < bytes.Length; i += 2)
+            {
+                aux = "";
+                subtyp = 0;
+                increaseSampleTime = true;
+
+                int A = bytes[i + 1] >> 2;
+                int I = (((bytes[i + 1] & 0x03) << 6) | bytes[i]);
+
+                switch (A)
+                {
+                    // NUM
+                    case 60:
+                        num = I;
+                        annotation.Num = num;
+                        increaseSampleTime = false;
+                        break;
+                    // SUB      
+                    case 61:
+                        subtyp = I;
+                        annotation.SubTyp = subtyp;
+                        increaseSampleTime = false;
+                        break;
+                    // CHAN
+                    case 62:
+                        chan = I;
+                        annotation.Chan = chan;
+                        increaseSampleTime = false;
+                        break;
+                    // AUX
+                    case 63:
+                        for (int j = 0; j < I; j++)
+                        {
+                            // next I bytes are the aux string letters.
+                            // since we are reading two bytes at a time in main for loop, the aux string starts at (i+1)+1 position hence the: i+2+offset formula
+                            aux += Convert.ToChar(bytes[i + 2 + j]);
+                        }
+
+                        // if I is odd, there is a null byte pad appended to make the byte count even, but the null byte is not included in the byte count represented by I
+                        i += I + (I % 2 == 0 ? 0 : 1);
+
+                        annotation.Aux = aux;
+                        increaseSampleTime = false;
+                        break;
+                    // EOF
+                    case 0:
+                        if (I == 0)
+                        {
+                            return standardAnnotations;
+                        }
+                        break;
+                }
+
+                if (increaseSampleTime)
+                {
+                    sampleTime += I;
+
+                    annotation = new ECGAnnotation();
+                    annotation.Type = ANNOTATION_TYPE.PHYSIONET_STANDARD;
+                    annotation.TimeIndex = sampleTime * (1.0 / Frequency);
+                    annotation.Text = ECGAnnotation.getStandardAnnotationTextFromCode(A);
+                    annotation.Aux = aux;
+                    annotation.Chan = chan;
+                    annotation.Num = num;
+                    annotation.SubTyp = subtyp;
+
+                    if (annotation.Chan == (channelToLoad - 1))
+                        standardAnnotations.Add(annotation);
+                }
+                else
+                {
+                    if (aux.Length > 0)
+                        annotation.Text += " " + aux;
+                }
+            }
+
+            return standardAnnotations;
+        }
+
         static private ECG loadECGFromSignalTextFile(String signalFileName, int channelToLoad = 1)
         {
             String signal = signalFileName.Substring(0, signalFileName.Length - 4);
