@@ -243,13 +243,22 @@ namespace Visualiser.ViewModels
 
         private void loadAnnotationsFromSignalView(Boolean filterOutSolutions = false)
         {
-            if (_ecgSignal == null)
+            if (_ecgSignal == null || !_areAnnotationsDisplayed)
                 return;
+
+            _annotationsView.Clear();
 
             _ecgSignal.Annotations.ForEach(
                 ecgannotation =>
                 {
-                    if (filterOutSolutions && ecgannotation.Type == ANNOTATION_TYPE.SOLUTION)
+                    if (!_areCustomSolutionAnnotationsDisplayed && ecgannotation.Type == ANNOTATION_TYPE.SOLUTION)
+                        return;
+
+                    double lowerTimeIndex = _plotModel.Axes[0].ActualMinimum;
+                    double upperTimeIndex = _plotModel.Axes[0].ActualMaximum;
+
+                    // ignore invisible annotations
+                    if (ecgannotation.TimeIndex < lowerTimeIndex || ecgannotation.TimeIndex > upperTimeIndex)
                         return;
 
                     DataPoint positionForAnnotation;
@@ -357,6 +366,14 @@ namespace Visualiser.ViewModels
                     ECGPlot.InvalidatePlot(true);                      
                 }
             }
+        }
+
+        private void ECGPlot_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            // if there is mouse movement and right key is pressed
+            if (e.RightButton == MouseButtonState.Pressed){
+                loadAnnotationsFromSignalView(_areCustomSolutionAnnotationsDisplayed);
+            }  
         }
 
     }
