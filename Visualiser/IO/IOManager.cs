@@ -21,7 +21,7 @@ namespace Visualiser.IO
         static private int ChannelNumber;
 
         static public List<String> loadCanals(String signalFileName){
-            StreamReader strReader = new StreamReader(signalFileName + ".hea");
+            StreamReader strReader = new StreamReader(signalFileName);
             String line = strReader.ReadLine();
             List<String> firstLine = line.Split(' ').ToList();
             ChannelNumber = Convert.ToInt32(firstLine[1]);
@@ -114,6 +114,7 @@ namespace Visualiser.IO
             ECG ecg = new ECG();
             ecg.Name = signalFileName;
             ecg.Points = ecgPoints;
+            ecg.SamplingRate = Frequency;
             return ecg;
             // look for HEA ATR DAT & CUST on path etc.
         }
@@ -154,6 +155,7 @@ namespace Visualiser.IO
             ECG ecg = new ECG();
             ecg.Name = signalFileName;
             ecg.Points = ecgPoints;
+            ecg.SamplingRate = Frequency;
             return ecg;
         }
         /// <summary>

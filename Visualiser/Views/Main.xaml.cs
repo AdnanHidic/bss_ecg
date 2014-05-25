@@ -153,7 +153,20 @@ namespace Visualiser.Views
                 string filename = dlg.FileName;
                 try
                 {
-                    ecgView.ECGSignal = IOManager.loadECGFromSignalFile(filename);
+                    List<String> channelNames = IOManager.loadCanals(filename);
+
+                    ChannelSelector channelSelector = new ChannelSelector(channelNames);
+                    channelSelector.ShowDialog();
+
+                    int selectedChannelIndex = channelSelector.SelectedChannel;
+                    if (selectedChannelIndex == -1)
+                    {
+                        MessageBox.Show("No channel selected. Aborting signal load.");
+                        return;
+                    }
+
+                    signal = IOManager.loadECGFromSignalFile(filename,selectedChannelIndex+1);
+                    ecgView.ECGSignal = signal ;
                 }
                 catch (RequiredFilesMissingException ex)
                 {
@@ -164,7 +177,7 @@ namespace Visualiser.Views
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message);
+                    MessageBox.Show("Unexpected error occurred: "+ex.Message);
                 }
             }
             // else just ignore it
