@@ -86,7 +86,7 @@ namespace Visualiser.IO
             if (standardAnnotations != null)
             {
                 if (customAnnotations != null)
-                    standardAnnotations.Concat(customAnnotations);
+                    standardAnnotations = standardAnnotations.Concat(customAnnotations).ToList();
 
                 ecg.Annotations = standardAnnotations;
             }
