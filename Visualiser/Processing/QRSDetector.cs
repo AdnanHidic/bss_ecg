@@ -13,12 +13,28 @@ namespace Visualiser.Processing
     /// </summary>
     public static class QRSDetector
     {
+        public static double Determine_HeartRate(ECG signal, double lowerTimeIndex, double upperTimeIndex)
+        {
+            List<ECGPoint> spikesWithinBounds = signal.Spikes.Where(ecgpoint =>
+            {
+                return ecgpoint.TimeIndex >= lowerTimeIndex && ecgpoint.TimeIndex <= upperTimeIndex;
+            }).ToList();
+
+            // get the seconds between first and the last spike
+            double sumTimesBetweenSpikes = spikesWithinBounds[spikesWithinBounds.Count - 1].TimeIndex - spikesWithinBounds[0].TimeIndex;
+            // determine the HR
+            double heartRate = 60 * spikesWithinBounds.Count / sumTimesBetweenSpikes;
+
+            return heartRate;
+        }
+
+
         /// <summary>
         /// Performs QRS-complex detection on ECG signal provided as call argument.
         /// </summary>
         /// <param name="signal">ECG signal object</param>
         /// <returns>List of ECG points determined to be R spikes and Decimal value for measured heart-rate</returns>
-        public static Tuple<List<ECGPoint>,double> QRS_Detect(ECG signal)
+        public static List<ECGPoint> QRS_Detect(ECG signal)
         {
             // extract voltages from ecg signal points
             double[] voltages = signal.Points.Select(point => point.Value).ToArray();
@@ -26,17 +42,8 @@ namespace Visualiser.Processing
             List<int> spikeIndices = SoAndChan(voltages);
             // map indices of R spikes into corresponding ecg signal points
             List<ECGPoint> spikes = spikeIndices.Select(index => signal.Points[index]).ToList();
-            
-            // if there are not enough spikes to determine HR
-            if (spikes.Count < 2)
-                return new Tuple<List<ECGPoint>, double>(spikes, -1);
 
-            // get the seconds between first and the last spike
-            double sumTimesBetweenSpikes= spikes[spikes.Count-1].TimeIndex - spikes[0].TimeIndex;
-            // determine the HR
-            double heartRate = 60 * spikes.Count/ sumTimesBetweenSpikes;
-
-            return new Tuple<List<ECGPoint>, double>(spikes, heartRate);
+            return spikes;
         
         }
 

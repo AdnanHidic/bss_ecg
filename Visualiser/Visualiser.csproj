@@ -74,6 +74,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\CalculateHROptions.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ChannelSelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -100,6 +104,9 @@
     </Compile>
     <Compile Include="Views\AnnotationInsert.xaml.cs">
       <DependentUpon>AnnotationInsert.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CalculateHROptions.xaml.cs">
+      <DependentUpon>CalculateHROptions.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ChannelSelector.xaml.cs">
       <DependentUpon>ChannelSelector.xaml</DependentUpon>

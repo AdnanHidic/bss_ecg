@@ -123,8 +123,27 @@ namespace Visualiser.Views
                 return;
 
             var result = QRSDetector.QRS_Detect(signal);
-            signal.HeartRate = result.Item2;
-            signal.Spikes = result.Item1;
+            signal.Spikes = result;
+            ecgView.refresh();
+        }
+
+        private void CalculateHR_MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (signal == null || signal.Spikes.Count == 0)
+            {
+                MessageBox.Show("QRS detection needs to be performed before calculating HR.");
+                return;
+            }
+
+            CalculateHROptions w = new CalculateHROptions();
+            w.HRCalculationRequested += w_HRCalculationRequested;
+            w.ShowDialog();
+        }
+
+        void w_HRCalculationRequested(double lower, double upper)
+        {
+            double HR = QRSDetector.Determine_HeartRate(signal, lower, upper);
+            signal.HeartRate = HR;
             ecgView.refresh();
         }
 

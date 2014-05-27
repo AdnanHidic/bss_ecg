@@ -25,6 +25,8 @@
                 <MenuItem Header="Detect QRS" Click="DetectQRS_MenuItem_Click"/>
                 <MenuItem Header="Toggle QRS" Click="ToggleSpikes_MenuItem_Click"/>
                 <Separator/>
+                <MenuItem Header="Calculate HR" Click="CalculateHR_MenuItem_Click"/>
+                <Separator/>
                 <MenuItem Header="Insert annotation" Click="InsertAnnotation_MenuItem_Click"/>
                 <MenuItem Header="Delete annotations" Click="DeleteAnnotation_MenuItem_Click"/>
                 <Separator/>
