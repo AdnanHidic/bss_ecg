@@ -25,7 +25,7 @@ namespace Visualiser.Processing
             // determine the HR
             double heartRate = 60 * spikesWithinBounds.Count / sumTimesBetweenSpikes;
 
-            return heartRate;
+            return Math.Round(heartRate,2);
         }
 
 
