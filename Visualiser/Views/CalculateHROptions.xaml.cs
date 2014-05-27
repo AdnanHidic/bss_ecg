@@ -68,6 +68,12 @@ namespace Visualiser.Views
                     for (int i = 0; i < upperTimeIndexNumbers.Length; i++)
                         upperTimeIndex += upperTimeIndexNumbers[i];
 
+                    if (upperTimeIndex <= lowerTimeIndex)
+                    {
+                        MessageBox.Show("Invalid time indices specified. Lower bound must be 'lower' than the upper bound");
+                        return;
+                    }
+
                     OnHRCalculationRequested(lowerTimeIndex, upperTimeIndex);
                 }
                 catch (Exception)
