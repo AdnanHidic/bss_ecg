@@ -464,7 +464,7 @@ namespace Visualiser.IO
                     {
                         Type = (ANNOTATION_TYPE)Enum.Parse(typeof(ANNOTATION_TYPE), list[0].ToString()),
                         TimeIndex = Convert.ToDouble(list[2]),
-                        Text = String.Join(String.Empty,help)
+                        Text = String.Join(" ",help)
                     };
                     annotations.Add(annotation);
                 }

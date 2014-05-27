@@ -257,6 +257,9 @@ namespace Visualiser.ViewModels
                     double lowerTimeIndex = _plotModel.Axes[0].ActualMinimum;
                     double upperTimeIndex = _plotModel.Axes[0].ActualMaximum;
 
+                    String text = ecgannotation.Text;
+                    OxyColor color = OxyColors.White;
+
                     // ignore invisible annotations
                     if (ecgannotation.TimeIndex < lowerTimeIndex || ecgannotation.TimeIndex > upperTimeIndex)
                         return;
@@ -267,18 +270,22 @@ namespace Visualiser.ViewModels
                             positionForAnnotation = new DataPoint(ecgannotation.TimeIndex, -1.8);
                             break;
                         case  ANNOTATION_TYPE.SOLUTION:
+                            color = OxyColors.LightGreen;
+                            text = "Solution: \n" + text;
                             positionForAnnotation = new DataPoint(ecgannotation.TimeIndex, -1.3);
                             break;
                         default:
+                            color = OxyColors.LightBlue;
+                            text = "Answer: \n" + text;
                             positionForAnnotation = new DataPoint(ecgannotation.TimeIndex, 1.5);
                             break;
                     }
 
                     TextAnnotation textAnnotation = new TextAnnotation()
                     {
-                        Text = ecgannotation.Text,
+                        Text = text,
                         TextPosition = positionForAnnotation,
-                        Background = OxyColors.White
+                        Background = color
                     };
 
                     _annotationsView.Add(textAnnotation);
